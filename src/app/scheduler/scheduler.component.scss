@@ -1,0 +1,31 @@
+.grid-scheduler {
+  border: black 1px solid;
+  height: 100px;
+}
+
+.example-list {
+  width: 1000px;
+  max-width: 100%;
+  min-height: 60px;
+  display: flex;
+  flex-direction: row;
+  background: white;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.example-box {
+  padding: 20px 10px;
+  color: rgba(0, 0, 0, 0.87);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  box-sizing: border-box;
+  cursor: move;
+  background: deepskyblue;
+  font-size: 14px;
+  flex-grow: 1;
+  flex-basis: 0;
+}
+
