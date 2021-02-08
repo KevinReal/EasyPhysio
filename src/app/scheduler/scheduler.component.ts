@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import {CdkDragDrop, moveItemInArray, transferArrayItem} from '@angular/cdk/drag-drop';
 
 @Component({
@@ -6,7 +6,7 @@ import {CdkDragDrop, moveItemInArray, transferArrayItem} from '@angular/cdk/drag
   templateUrl: './scheduler.component.html',
   styleUrls: ['./scheduler.component.scss']
 })
-export class SchedulerComponent implements OnInit {
+export class SchedulerComponent {
 
   numberCols = Array(7);
   numberRows = Array(13);
