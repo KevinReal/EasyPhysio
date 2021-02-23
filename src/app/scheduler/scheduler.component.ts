@@ -1,28 +1,29 @@
-import { Component } from '@angular/core';
-import {CdkDragDrop, moveItemInArray, transferArrayItem} from '@angular/cdk/drag-drop';
+import { Component, OnInit } from '@angular/core';
+import { CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
+import { IAppointment } from "../models/IAppointment";
+import { ScheduleService } from "../services/schedule.service"
 
 @Component({
   selector: 'app-scheduler',
   templateUrl: './scheduler.component.html',
   styleUrls: ['./scheduler.component.scss']
 })
-export class SchedulerComponent {
+export class SchedulerComponent implements OnInit {
 
-  numberCols = Array(7);
-  numberRows = Array(13);
+  numberCols = Array(5);
+  numberRowsFirstColumn = Array(4);
+  numberRowsGrid = Array(8);
+  citas: IAppointment[][][] = [];
 
-  cita1 = [
-    'Cita1'
-  ];
-  cita2 = [
-    'Cita2',
-    'Cita3'
-  ];
+  constructor(private scheduleService: ScheduleService) { }
 
-  constructor() { }
+  ngOnInit() {
+    this.scheduleService.getScheduleByPyshioAndRangeOfDates('', new Date(), new Date()).subscribe(
+      weeklySchedule => this.citas = weeklySchedule.weeklySchedule
+    );
+  }
 
-  drop(event: CdkDragDrop<string[]>) {
-    console.log(event);
+  drop(event: CdkDragDrop<IAppointment[]>) {
     if (event.previousContainer === event.container) {
       moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
     } else {
