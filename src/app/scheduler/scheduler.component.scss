@@ -8,16 +8,25 @@
 
 .grid-scheduler {
   border: 1px solid black;
-  height: 100px;
+  height: 15vh;
+  padding: 1vh;
+  background: greenyellow;
+  flex-grow: 1;
+  flex-basis: 0;
+  border-radius: 10px;
+}
+
+.grid-scheduler:hover {
+  cursor: pointer;
 }
 
 .height-first-row {
-  height: 60px;
+  height: 10vh;
 }
 
 .first-column {
-  height: 100px;
-  padding-left: 15px
+  height: 15vh;
+  padding-left: 1vh;
 }
 
 .transform-first-row-text {
@@ -25,8 +34,8 @@
 }
 
 .last-item-first-row {
-  height: 130px;
-  padding-left: 15px;
+  height: 17vh;
+  padding-left: 1vh;
 }
 
 .transform-last-item-first-row-text {
@@ -34,32 +43,27 @@
 }
 
 .empty-space {
-  height: 100px;
-  margin:15px 0;
+  height: 15vh;
+  margin:1vh 0;
   background: grey;
 }
 
-.example-list {
-  height: 100px;
+.drop-list-grid {
+  height: 15vh;
   display: flex;
   flex-direction: row;
   border: 1px solid red;
 }
 
-.example-box {
-  padding: 10px;
+.cdk-drop-list-dragging {
   cursor: move;
-  background: greenyellow;
-  flex-grow: 1;
-  flex-basis: 0;
-  border-radius: 10px;
 }
 
 .header-container {
   min-height: 20vh;
 }
 
-.calendar-container, .physios-container {
+.calendar-container {
   text-align: center;
   padding: 5vh;
 }

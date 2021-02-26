@@ -7,7 +7,10 @@ import { SchedulerComponent } from './scheduler/scheduler.component';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { AppointmentComponent } from './appointment/appointment.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import {DragDropModule} from "@angular/cdk/drag-drop";
+import { DragDropModule } from "@angular/cdk/drag-drop";
+import { HttpClientModule } from '@angular/common/http';
+import { HttpClientInMemoryWebApiModule } from 'angular-in-memory-web-api';
+import { InMemoryDataService } from './in-memory-data.service';
 
 @NgModule({
   declarations: [
@@ -20,7 +23,11 @@ import {DragDropModule} from "@angular/cdk/drag-drop";
     AppRoutingModule,
     NgbModule,
     BrowserAnimationsModule,
-    DragDropModule
+    DragDropModule,
+    HttpClientModule,
+    HttpClientInMemoryWebApiModule.forRoot(
+      InMemoryDataService, { dataEncapsulation: false }
+    )
   ],
   providers: [],
   bootstrap: [AppComponent]

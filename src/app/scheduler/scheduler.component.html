@@ -1,7 +1,11 @@
 <div class="main-container">
   <div class="row header-container">
     <div class="col-12 calendar-container">
-      < 1 - 5 Feb >
+      <p>
+        <span (click)="populateWeekDays(-7)">< </span>
+        <span>{{weekDays[0]}} - {{weekDays[4]}} {{monthsOfTheYear[recalculatedMonth]}}</span>
+        <span (click)="populateWeekDays(7)"> ></span>
+      </p>
     </div>
   </div>
   <div class="row">
@@ -38,40 +42,24 @@
 
     <div class="col-11">
       <div class="row height-first-row">
-        <div class="col">
-          <p class="align-center">Lunes</p>
-          <p class="align-center">1</p>
-        </div>
-        <div class="col">
-          <p class="align-center">Martes</p>
-          <p class="align-center">2</p>
-        </div>
-        <div class="col">
-          <p class="align-center">Miércoles</p>
-          <p class="align-center">3</p>
-        </div>
-        <div class="col">
-          <p class="align-center">Jueves</p>
-          <p class="align-center">4</p>
-        </div>
-        <div class="col">
-          <p class="align-center">Viernes</p>
-          <p class="align-center">5</p>
+        <div class="col" *ngFor="let day of daysOfTheWeek; let i = index">
+          <p class="align-center">{{day}}</p>
+          <p class="align-center">{{weekDays[i]}}</p>
         </div>
       </div>
 
-      <div cdkDropListGroup class="scheduler-container">
+      <div cdkDropListGroup class="scheduler-container" *ngIf="appointments.length > 0">
         <div *ngFor="let row of numberRowsGrid; let i = index"
              class="row">
           <div *ngFor="let col of numberCols; let j = index"
                cdkDropList
                cdkDropListOrientation="horizontal"
-               [cdkDropListData]="citas[i][j]"
+               [cdkDropListData]="appointments[i][j]"
                (cdkDropListDropped)="drop($event)"
-              class="col example-list">
-            <div *ngFor="let cita of citas[i][j]"
+               class="col drop-list-grid">
+            <div *ngFor="let cita of appointments[i][j]"
                  cdkDragBoundary=".scheduler-container"
-                 class="example-box grid-scheduler"
+                 class="grid-scheduler"
                  cdkDrag>
               <p>{{cita.patientName}}</p>
               <p>Sala {{cita.roomNumber}}</p>
@@ -87,12 +75,12 @@
           <div *ngFor="let col of numberCols; let j = index"
                cdkDropList
                cdkDropListOrientation="horizontal"
-               [cdkDropListData]="citas[i+8][j]"
+               [cdkDropListData]="appointments[i+8][j]"
                (cdkDropListDropped)="drop($event)"
-               class="col example-list">
-            <div *ngFor="let cita of citas[i+8][j]"
+               class="col drop-list-grid">
+            <div *ngFor="let cita of appointments[i+8][j]"
                  cdkDragBoundary=".scheduler-container"
-                 class="example-box grid-scheduler"
+                 class="grid-scheduler"
                  cdkDrag>
               <p>{{cita.patientName}}</p>
               <p>Sala {{cita.roomNumber}}</p>
