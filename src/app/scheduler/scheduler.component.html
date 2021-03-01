@@ -52,12 +52,14 @@
         <div *ngFor="let row of numberRowsGrid; let i = index"
              class="row">
           <div *ngFor="let col of numberCols; let j = index"
+               (click)="openModalCreate(crear, i, j)"
                cdkDropList
                cdkDropListOrientation="horizontal"
                [cdkDropListData]="appointments[i][j]"
                (cdkDropListDropped)="drop($event)"
                class="col drop-list-grid">
             <div *ngFor="let cita of appointments[i][j]"
+                 (click)="openModal(editarBorrar, cita, i, j)"
                  cdkDragBoundary=".scheduler-container"
                  class="grid-scheduler"
                  cdkDrag>
@@ -92,3 +94,59 @@
     </div>
   </div>
 </div>
+
+
+
+
+
+<ng-template #editarBorrar let-modal>
+  <div class="modal-body">
+    <form>
+      <div class="form-group">
+        <label for="paciente">Paciente:</label>
+        <div class="input-group">
+          <input id="paciente" class="form-control" placeholder="Escriba nombre del paciente" name="paciente" [ngModel]="selectedAppointment.patientName">
+        </div>
+        <label for="sala">Sala:</label>
+        <div class="input-group">
+          <input id="sala" class="form-control" placeholder="Elija sala" name="sala" [ngModel]="selectedAppointment.roomNumber">
+        </div>
+        <label for="motivoCita">Motivo de la cita:</label>
+        <div class="input-group">
+          <input id="motivoCita" class="form-control" placeholder="Escriba motivo de la cita" name="motivoCita" [ngModel]="selectedAppointment.reasonAppointment">
+        </div>
+      </div>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-outline-dark" (click)="updateAppointment(selectedAppointment)">Editar</button>
+    <button type="button" class="btn btn-outline-dark" (click)="deleteAppointment(selectedAppointment)">Borrar</button>
+  </div>
+</ng-template>
+
+
+
+
+<ng-template #crear let-modal>
+  <div class="modal-body">
+    <form>
+      <div class="form-group">
+        <label for="pacienteNuevo">Paciente:</label>
+        <div class="input-group">
+          <input id="pacienteNuevo" class="form-control" placeholder="Escriba nombre del paciente" name="paciente" [(ngModel)]="newAppointment.patientName">
+        </div>
+        <label for="salaNueva">Sala:</label>
+        <div class="input-group">
+          <input id="salaNueva" class="form-control" placeholder="Elija sala" name="sala" [(ngModel)]="newAppointment.roomNumber">
+        </div>
+        <label for="motivoCitaNuevo">Motivo de la cita:</label>
+        <div class="input-group">
+          <input id="motivoCitaNuevo" class="form-control" placeholder="Escriba motivo de la cita" name="motivoCita" [(ngModel)]="newAppointment.reasonAppointment">
+        </div>
+      </div>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-outline-dark" (click)="createAppointment(newAppointment)">Crear</button>
+  </div>
+</ng-template>

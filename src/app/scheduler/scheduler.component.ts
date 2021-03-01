@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 import { IAppointment } from "../models/IAppointment";
 import { ScheduleService } from "../services/schedule.service"
+import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
   selector: 'app-scheduler',
@@ -44,7 +45,13 @@ export class SchedulerComponent implements OnInit {
     [[],[],[],[],[]]
   ];
 
-  constructor(private scheduleService: ScheduleService) { }
+  selectedAppointment: IAppointment = {} as IAppointment;
+  newAppointment: IAppointment = {} as IAppointment;
+  gridIPosition = -1;
+  gridJPosition = -1;
+
+  constructor(private scheduleService: ScheduleService,
+              private modalService: NgbModal) { }
 
   ngOnInit() {
     this.getScheduleByPyshioAndRangeOfDates();
@@ -71,14 +78,16 @@ export class SchedulerComponent implements OnInit {
 
   createAppointment(appointment: IAppointment): void {
     this.scheduleService.createAppointment(appointment).subscribe(ok => {
-      console.log(ok);
+      this.scheduleService.getScheduleByPyshioAndRangeOfDates('', this.currentDate, this.currentDate).subscribe(X => {
+        console.log(X);
+      });
     });
   }
 
   deleteAppointment(appointment: IAppointment): void {
-    this.scheduleService.deleteAppointment(appointment).subscribe(ok => {
-      console.log(ok);
-    });
+    this.scheduleService.deleteAppointment(appointment).subscribe(
+      () => this.mockSchedule[this.gridIPosition][this.gridJPosition] =
+        this.mockSchedule[this.gridIPosition][this.gridJPosition].filter(h => h !== appointment));
   }
 
   drop(event: CdkDragDrop<IAppointment[]>): void {
@@ -110,6 +119,25 @@ export class SchedulerComponent implements OnInit {
         this.weekDays.push(dayOfWeek);
       }
     }
+  }
+
+  openModal(editarBorrar:any, cita: IAppointment, i: number, j: number) {
+    this.selectedAppointment = cita;
+    this.gridIPosition = i;
+    this.gridJPosition = j;
+
+    this.modalService.open(editarBorrar).result.then((result) => {
+    }, (reason) => {
+    });
+  }
+
+  openModalCreate(crear:any, i: number, j: number) {
+    this.gridIPosition = i;
+    this.gridJPosition = j;
+
+    this.modalService.open(crear).result.then((result) => {
+    }, (reason) => {
+    });
   }
 
 }
