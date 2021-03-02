@@ -63,7 +63,7 @@
                  cdkDragBoundary=".scheduler-container"
                  class="grid-scheduler"
                  cdkDrag>
-              <p>{{cita.patientName}}</p>
+              <p>{{cita.treatment.patient.name}} {{cita.treatment.patient.lastname}}</p>
               <p>Sala {{cita.roomNumber}}</p>
               <p>{{cita.reasonAppointment}}</p>
             </div>
@@ -84,7 +84,7 @@
                  cdkDragBoundary=".scheduler-container"
                  class="grid-scheduler"
                  cdkDrag>
-              <p>{{cita.patientName}}</p>
+              <p>{{cita.treatment.patient.name}} {{cita.treatment.patient.lastname}}</p>
               <p>Sala {{cita.roomNumber}}</p>
               <p>{{cita.reasonAppointment}}</p>
             </div>
@@ -105,7 +105,7 @@
       <div class="form-group">
         <label for="paciente">Paciente:</label>
         <div class="input-group">
-          <input id="paciente" class="form-control" placeholder="Escriba nombre del paciente" name="paciente" [ngModel]="selectedAppointment.patientName">
+          <input id="paciente" class="form-control" placeholder="Escriba nombre del paciente" name="paciente" [ngModel]="selectedAppointment.treatment.patient.name">
         </div>
         <label for="sala">Sala:</label>
         <div class="input-group">
@@ -133,7 +133,7 @@
       <div class="form-group">
         <label for="pacienteNuevo">Paciente:</label>
         <div class="input-group">
-          <input id="pacienteNuevo" class="form-control" placeholder="Escriba nombre del paciente" name="paciente" [(ngModel)]="newAppointment.patientName">
+          <input id="pacienteNuevo" class="form-control" placeholder="Escriba nombre del paciente" name="paciente" [(ngModel)]="newAppointment.treatment.patient.name">
         </div>
         <label for="salaNueva">Sala:</label>
         <div class="input-group">

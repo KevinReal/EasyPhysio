@@ -70,7 +70,7 @@ export class SchedulerComponent implements OnInit {
   }
 
   updateAppointment(appointment: IAppointment): void {
-    appointment.patientName = 'nombre cambiado!';
+    appointment.treatment.patient.name = 'nombre cambiado!';
     this.scheduleService.updateAppointment(appointment).subscribe(ok => {
       console.log(ok);
     });
