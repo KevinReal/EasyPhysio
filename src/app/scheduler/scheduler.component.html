@@ -13,30 +13,10 @@
 
       <div class="height-first-row"></div>
 
-      <div *ngFor="let row of numberRowsFirstColumn; let i = index">
+      <div *ngFor="let hour of workingHours; let i = index">
         <div class="first-column">
-          <p class="transform-first-row-text">{{i + 9}}:00pm</p>
+          <p class="transform-first-row-text">{{hour}}</p>
         </div>
-        <div class="first-column">
-          <p class="transform-first-row-text">{{i + 9}}:30pm</p>
-        </div>
-      </div>
-
-      <div class="last-item-first-row">
-        <p class="transform-last-item-first-row-text">13:00pm</p>
-      </div>
-
-      <div *ngFor="let row of numberRowsFirstColumn; let i = index">
-        <div class="first-column">
-          <p class="transform-first-row-text">{{i + 16}}:00pm</p>
-        </div>
-        <div class="first-column">
-          <p class="transform-first-row-text">{{i + 16}}:30pm</p>
-        </div>
-      </div>
-
-      <div class="first-column">
-        <p class="transform-last-item-first-row-text">20:00pm</p>
       </div>
     </div>
 
@@ -48,39 +28,18 @@
         </div>
       </div>
 
-      <div cdkDropListGroup class="scheduler-container" *ngIf="appointments.length > 0">
+      <div cdkDropListGroup class="scheduler-container" *ngIf="appointments">
         <div *ngFor="let row of numberRowsGrid; let i = index"
              class="row">
           <div *ngFor="let col of numberCols; let j = index"
                (click)="openModalCreate(crear, i, j)"
                cdkDropList
                cdkDropListOrientation="horizontal"
-               [cdkDropListData]="appointments[i][j]"
-               (cdkDropListDropped)="drop($event)"
+               [cdkDropListData]="appointments | appointments: workingHours[i] : weekDays[j]"
+               (cdkDropListDropped)="drop($event, workingHours[i], weekDays[j])"
                class="col drop-list-grid">
-            <div *ngFor="let cita of appointments[i][j]"
+            <div *ngFor="let cita of appointments | appointments: workingHours[i] : weekDays[j]"
                  (click)="openModal(editarBorrar, cita, i, j)"
-                 cdkDragBoundary=".scheduler-container"
-                 class="grid-scheduler"
-                 cdkDrag>
-              <p>{{cita.treatment.patient.name}} {{cita.treatment.patient.lastname}}</p>
-              <p>Sala {{cita.roomNumber}}</p>
-              <p>{{cita.reasonAppointment}}</p>
-            </div>
-          </div>
-        </div>
-
-        <div class="empty-space"></div>
-
-        <div *ngFor="let row of numberRowsGrid; let i = index"
-             class="row">
-          <div *ngFor="let col of numberCols; let j = index"
-               cdkDropList
-               cdkDropListOrientation="horizontal"
-               [cdkDropListData]="appointments[i+8][j]"
-               (cdkDropListDropped)="drop($event)"
-               class="col drop-list-grid">
-            <div *ngFor="let cita of appointments[i+8][j]"
                  cdkDragBoundary=".scheduler-container"
                  class="grid-scheduler"
                  cdkDrag>
@@ -119,9 +78,7 @@
     </form>
   </div>
   <div class="modal-footer">
-    <button type="button" class="btn btn-outline-dark" (click)="updateAppointment(selectedAppointment)">Editar</button>
-    <button type="button" class="btn btn-outline-dark" (click)="deleteAppointment(selectedAppointment)">Borrar</button>
-  </div>
+    </div>
 </ng-template>
 
 

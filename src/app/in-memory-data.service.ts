@@ -14,7 +14,7 @@ export class InMemoryDataService implements InMemoryDbService {
       {
         id: 1,
         dateAppointment: new Date(),
-        startAppointment: new Date(),
+        startAppointment: new Date('March 8, 2021 12:00:00'),
         endAppointment: new Date(),
         reasonAppointment: 'Zona lumbar',
         roomNumber: 1,
@@ -39,7 +39,7 @@ export class InMemoryDataService implements InMemoryDbService {
       {
         id: 2,
         dateAppointment: new Date(),
-        startAppointment: new Date(),
+        startAppointment: new Date('March 8, 2021 12:00:00'),
         endAppointment: new Date(),
         reasonAppointment: 'Core',
         roomNumber: 2,
@@ -54,8 +54,8 @@ export class InMemoryDataService implements InMemoryDbService {
           } as IPhysio,
           patient: {
             email: 'pacientemock@easyphysio.com',
-            name: 'Juanito',
-            lastname: 'Menda Lerenda',
+            name: 'Pepito',
+            lastname: 'primo del otro',
             phoneNumber: '123456789',
             photo: 'imagen base64 aqui jeje',
           } as IPatient,
@@ -64,7 +64,7 @@ export class InMemoryDataService implements InMemoryDbService {
       {
         id: 3,
         dateAppointment: new Date(),
-        startAppointment: new Date(),
+        startAppointment: new Date('March 9, 2021 12:30:00'),
         endAppointment: new Date(),
         reasonAppointment: 'me duele todo :(',
         roomNumber: 3,
@@ -79,8 +79,33 @@ export class InMemoryDataService implements InMemoryDbService {
           } as IPhysio,
           patient: {
             email: 'pacientemock@easyphysio.com',
-            name: 'Juanito',
-            lastname: 'Menda Lerenda',
+            name: 'Pulgarcito',
+            lastname: 'el de pinocho',
+            phoneNumber: '123456789',
+            photo: 'imagen base64 aqui jeje',
+          } as IPatient,
+        } as ITreatment,
+      },
+      {
+        id: 4,
+        dateAppointment: new Date(),
+        startAppointment: new Date('March 11, 2021 13:00:00'),
+        endAppointment: new Date(),
+        reasonAppointment: 'me lo dijo el médico',
+        roomNumber: 4,
+        treatment: {
+          id: 4,
+          physio: {
+            dni: '12345678K',
+            name: 'Pepito',
+            lastname: 'De los Palotes',
+            phoneNumber: '123456789',
+            photo: 'imagen base64 aqui jeje',
+          } as IPhysio,
+          patient: {
+            email: 'pacientemock@easyphysio.com',
+            name: 'Tupac',
+            lastname: 'Shakur',
             phoneNumber: '123456789',
             photo: 'imagen base64 aqui jeje',
           } as IPatient,

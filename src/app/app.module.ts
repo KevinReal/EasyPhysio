@@ -12,12 +12,14 @@ import { HttpClientModule } from '@angular/common/http';
 import { HttpClientInMemoryWebApiModule } from 'angular-in-memory-web-api';
 import { InMemoryDataService } from './in-memory-data.service';
 import { FormsModule } from '@angular/forms';
+import { AppointmentsPipe } from './pipes/appointments.pipe';
 
 @NgModule({
   declarations: [
     AppComponent,
     SchedulerComponent,
-    AppointmentComponent
+    AppointmentComponent,
+    AppointmentsPipe
   ],
   imports: [
     BrowserModule,
