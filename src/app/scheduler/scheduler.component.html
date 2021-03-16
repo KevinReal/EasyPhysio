@@ -2,9 +2,16 @@
   <div class="row header-container">
     <div class="col-12 calendar-container">
       <p>
-        <span (click)="populateWeekDays(-7)">< </span>
-        <span>{{weekDays[0]}} - {{weekDays[4]}} {{monthsOfTheYear[recalculatedMonth]}}</span>
-        <span (click)="populateWeekDays(7)"> ></span>
+        <span (click)="goToToday()">Hoy</span>
+        <span (click)="goToPreviousWeek()">< </span>
+        <span (click)="goToNextWeek()"> ></span>
+        <span>{{monthsOfTheYear[monthToDisplay]}} de {{yearToDisplay}}</span>
+        <span> aqui va boton de calendario?</span>
+        <mat-form-field>
+          <input matInput [matDatepicker]="picker" placeholder="Choose a date" [(ngModel)]="calendarDate" (dateChange)="addEvent($event)">
+          <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+          <mat-datepicker #picker></mat-datepicker>
+        </mat-form-field>
       </p>
     </div>
   </div>
@@ -22,7 +29,7 @@
 
     <div class="col-11">
       <div class="row height-first-row">
-        <div class="col" *ngFor="let day of daysOfTheWeek; let i = index">
+        <div class="col" *ngFor="let day of workDays; let i = index">
           <p class="align-center">{{day}}</p>
           <p class="align-center">{{weekDays[i]}}</p>
         </div>
@@ -31,21 +38,26 @@
       <div cdkDropListGroup class="scheduler-container" *ngIf="appointments">
         <div *ngFor="let row of numberRowsGrid; let i = index"
              class="row">
-          <div *ngFor="let col of numberCols; let j = index"
-               (click)="openModalCreate(crear, i, j)"
+          <div *ngFor="let col of numberColsGrid; let j = index"
+               (click)="openModalCreate(crear, workingHours[i],  weekDays[j], workingHours[i+1])"
                cdkDropList
                cdkDropListOrientation="horizontal"
                [cdkDropListData]="appointments | appointments: workingHours[i] : weekDays[j]"
                (cdkDropListDropped)="drop($event, workingHours[i], weekDays[j])"
                class="col drop-list-grid">
             <div *ngFor="let cita of appointments | appointments: workingHours[i] : weekDays[j]"
-                 (click)="openModal(editarBorrar, cita, i, j)"
+                 (click)="openModal(editarBorrar, cita)"
                  cdkDragBoundary=".scheduler-container"
                  class="grid-scheduler"
                  cdkDrag>
-              <p>{{cita.treatment.patient.name}} {{cita.treatment.patient.lastname}}</p>
-              <p>Sala {{cita.roomNumber}}</p>
-              <p>{{cita.reasonAppointment}}</p>
+              <span *ngIf="(appointments | appointments: workingHours[i] : weekDays[j]).length < 3; else elseAppointmentLength">
+                <p>{{cita.treatment.patient.name}} {{cita.treatment.patient.lastname}}</p>
+                <p>Sala {{cita.roomNumber}}</p>
+                <p>{{cita.reasonAppointment}}</p>
+              </span>
+              <ng-template #elseAppointmentLength>
+                prueba
+              </ng-template>
             </div>
           </div>
         </div>
@@ -64,21 +76,23 @@
       <div class="form-group">
         <label for="paciente">Paciente:</label>
         <div class="input-group">
-          <input id="paciente" class="form-control" placeholder="Escriba nombre del paciente" name="paciente" [ngModel]="selectedAppointment.treatment.patient.name">
+          <input id="paciente" class="form-control" disabled placeholder="Escriba nombre del paciente" name="paciente" [(ngModel)]="selectedAppointment.treatment.patient.name">
         </div>
         <label for="sala">Sala:</label>
         <div class="input-group">
-          <input id="sala" class="form-control" placeholder="Elija sala" name="sala" [ngModel]="selectedAppointment.roomNumber">
+          <input id="sala" class="form-control" placeholder="Elija sala" name="sala" [(ngModel)]="selectedAppointment.roomNumber">
         </div>
         <label for="motivoCita">Motivo de la cita:</label>
         <div class="input-group">
-          <input id="motivoCita" class="form-control" placeholder="Escriba motivo de la cita" name="motivoCita" [ngModel]="selectedAppointment.reasonAppointment">
+          <input id="motivoCita" class="form-control" placeholder="Escriba motivo de la cita" name="motivoCita" [(ngModel)]="selectedAppointment.reasonAppointment">
         </div>
       </div>
     </form>
   </div>
   <div class="modal-footer">
-    </div>
+    <button type="button" class="btn btn-outline-dark" (click)="updateAppointment(selectedAppointment)">Editar</button>
+    <button type="button" class="btn btn-outline-dark" (click)="deleteAppointment(selectedAppointment)">Borrar</button>
+  </div>
 </ng-template>
 
 
@@ -104,6 +118,6 @@
     </form>
   </div>
   <div class="modal-footer">
-    <button type="button" class="btn btn-outline-dark" (click)="createAppointment(newAppointment)">Crear</button>
+    <button type="button" class="btn btn-outline-dark" (click)="addAppointment(newAppointment)">Crear</button>
   </div>
 </ng-template>

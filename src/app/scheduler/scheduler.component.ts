@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 import { IAppointment } from "../models/IAppointment";
-import { ScheduleService } from "../services/schedule.service"
+import { ScheduleService } from "../services/schedule.service";
+import { environment } from "../../environments/environment";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import * as moment from 'moment';
 
@@ -12,63 +13,48 @@ import * as moment from 'moment';
 })
 export class SchedulerComponent implements OnInit {
 
-  numberCols = Array(5);
-  numberRowsGrid = Array(48);
+  numberColsGrid = environment.numberColsGrid;
+  numberRowsGrid = environment.numberRowsGrid;
+  workDays = environment.workDays;
+  workingHours = environment.workingHours;
+  monthsOfTheYear = environment.monthsOfTheYear;
+
+  recalculatedDate = moment();
+  calendarDate = moment();
+  getAppointmentsStartDate = moment();
+  getAppointmentsEndDate = moment();
+  monthToDisplay = moment().month();
+  yearToDisplay = moment().year();
+  weekDays: number[] = [];
 
   appointments: IAppointment[] = [];
-  currentDate = new Date();
-
-  daysOfTheWeek = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'];
-  monthsOfTheYear = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-                     'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
-  workingHours = ['00:00','00:30','01:00','01:30','02:00','02:30','03:00','03:30','04:00','04:30','05:00',
-                  '05:30','06:00','06:30','07:00','07:30','08:00','08:30','09:00','09:30','10:00','10:30',
-                  '11:00','11:30','12:00','12:30','13:00','13:30','14:00','14:30','15:00','15:30','16:00',
-                  '16:30','17:00','17:30','18:00','18:30','19:00','19:30','20:00','20:30','21:00','21:30',
-                  '22:00','22:30','23:00','23:30', '00:00'];
-
-  weekDays: number[] = [];
-  recalculatedDate = new Date();
-  recalculatedMonth = this.currentDate.getMonth();
-
   selectedAppointment: IAppointment = {} as IAppointment;
-  newAppointment: IAppointment = {} as IAppointment;
-  gridIPosition = -1;
-  gridJPosition = -1;
+  newAppointment: IAppointment = { treatment: { patient: {}}} as IAppointment;
 
   constructor(private scheduleService: ScheduleService,
               private modalService: NgbModal) { }
 
   ngOnInit() {
-    this.getScheduleByPyshioAndRangeOfDates();
-    this.populateWeekDays(0);
+    this.goToToday();
+    this.getAppointmentsByRangeOfDates();
   }
 
-  getScheduleByPyshioAndRangeOfDates(): void {
-    this.scheduleService.getScheduleByPyshioAndRangeOfDates('', this.currentDate, this.currentDate).subscribe(
-      weeklySchedule =>  this.appointments = weeklySchedule);
+  getAppointmentsByRangeOfDates(): void {
+    this.scheduleService.getAppointmentsByRangeOfDates(this.getAppointmentsStartDate, this.getAppointmentsEndDate)
+      .subscribe(weeklySchedule => this.appointments = weeklySchedule);
   }
 
   updateAppointment(appointment: IAppointment): void {
-    this.scheduleService.updateAppointment(appointment).subscribe(ok => {
-      this.getScheduleByPyshioAndRangeOfDates();
-      console.log(ok);
-    });
+    this.scheduleService.updateAppointment(appointment).subscribe(() => this.getAppointmentsByRangeOfDates());
   }
 
-  createAppointment(appointment: IAppointment): void {
-    this.scheduleService.createAppointment(appointment).subscribe(ok => {
-      this.scheduleService.getScheduleByPyshioAndRangeOfDates('', this.currentDate, this.currentDate).subscribe(X => {
-        console.log(X);
-      });
-    });
+  addAppointment(appointment: IAppointment): void {
+    this.scheduleService.addAppointment(appointment).subscribe(()=> this.getAppointmentsByRangeOfDates());
   }
 
-  /*deleteAppointment(appointment: IAppointment): void {
-    this.scheduleService.deleteAppointment(appointment).subscribe(
-      () => this.mockSchedule[this.gridIPosition][this.gridJPosition] =
-        this.mockSchedule[this.gridIPosition][this.gridJPosition].filter(h => h !== appointment));
-  }*/
+  deleteAppointment(appointment: IAppointment): void {
+    this.scheduleService.deleteAppointment(appointment).subscribe(() => this.getAppointmentsByRangeOfDates());
+  }
 
   drop(event: CdkDragDrop<IAppointment[]>, workingHours: string, weekDays: number): void {
     if (event.previousContainer === event.container) {
@@ -83,42 +69,101 @@ export class SchedulerComponent implements OnInit {
     }
   }
 
+  goToToday() {
+    this.populateWeekDays(0);
+  }
+
+  goToPreviousWeek() {
+    this.populateWeekDays(-7);
+  }
+
+  goToNextWeek() {
+    this.populateWeekDays(7);
+  }
+
+  // TODO: control leap year
   populateWeekDays(daysToAdd: number): void {
     this.weekDays = [];
+    let flagToUpdateMonth = true;
     if (daysToAdd !== 0) {
-      this.recalculatedDate = new Date(this.recalculatedDate.getFullYear(),
-                                       this.recalculatedDate.getMonth(),
-                                  this.recalculatedDate.getDate() + daysToAdd);
-      this.recalculatedMonth = this.recalculatedDate.getMonth();
-      for (let i = 1; i <= 7; i++) {
-        let dayOfWeek = this.recalculatedDate.getDate() - this.recalculatedDate.getDay() + i;
+      this.recalculatedDate = this.recalculatedDate.add(daysToAdd, 'days');
+      this.monthToDisplay = this.recalculatedDate.month();
+      this.yearToDisplay = this.recalculatedDate.year();
+      this.calendarDate = moment(this.recalculatedDate);
+      for (let i = 0; i <= 6; i++) {
+        let dayOfWeek = this.recalculatedDate.date() - ((this.recalculatedDate.days() + 6) % 7) + i;
+        if (dayOfWeek <= 0) {
+          if (flagToUpdateMonth){
+            flagToUpdateMonth = !flagToUpdateMonth;
+            if (this.monthToDisplay === 0) {
+              this.monthToDisplay = 11;
+            } else {
+              this.monthToDisplay -= 1;
+            }
+          }
+          switch (this.monthToDisplay) {
+            case 0:
+            case 2:
+            case 4:
+            case 6:
+            case 7:
+            case 9:
+            case 11:
+              dayOfWeek += 31;
+              break;
+            case 1:
+              dayOfWeek += 28;
+              break;
+            default:
+              dayOfWeek += 30;
+              break;
+          }
+        } else if (dayOfWeek > 28 && this.monthToDisplay === 1) {
+          dayOfWeek -= 28;
+        } else if (dayOfWeek > 30 && (this.monthToDisplay === 3 || this.monthToDisplay === 5 ||
+                                      this.monthToDisplay === 8 || this.monthToDisplay === 10)) {
+          dayOfWeek -= 30;
+        } else if (dayOfWeek > 31 && (this.monthToDisplay === 0 || this.monthToDisplay === 2 ||
+                                      this.monthToDisplay === 4 || this.monthToDisplay === 6 ||
+                                      this.monthToDisplay === 7 || this.monthToDisplay === 9 ||
+                                      this.monthToDisplay === 11)) {
+          dayOfWeek -= 31;
+        }
         this.weekDays.push(dayOfWeek);
       }
     } else {
-      for (let i = 1; i <= 7; i++) {
-        let dayOfWeek = this.currentDate.getDate() - this.currentDate.getDay() + i;
+      this.recalculatedDate = moment();
+      this.monthToDisplay = moment().month();
+      this.yearToDisplay = moment().year();
+      this.calendarDate = moment();
+      for (let i = 0; i <= 6; i++) {
+        let dayOfWeek = moment().date() - ((moment().days() + 6) % 7) + i ;
         this.weekDays.push(dayOfWeek);
       }
     }
+    this.getAppointmentsStartDate = moment(this.weekDays[0], "D");
+    this.getAppointmentsEndDate = moment(this.weekDays[4], "D").endOf('day');
   }
 
-  openModal(editarBorrar:any, cita: IAppointment, i: number, j: number) {
+  openModal(editarBorrar:any, cita: IAppointment) {
     this.selectedAppointment = cita;
-    this.gridIPosition = i;
-    this.gridJPosition = j;
 
     this.modalService.open(editarBorrar).result.then((result) => {
     }, (reason) => {
     });
   }
 
-  openModalCreate(crear:any, i: number, j: number) {
-    this.gridIPosition = i;
-    this.gridJPosition = j;
-
+  openModalCreate(crear: any, appointmentStartDate: string, weekDays: number, appointmentEndDate: string) {
+    this.newAppointment.dateAppointment = moment(weekDays + ' ' + appointmentStartDate, 'DD hh:mm').toDate();
+    this.newAppointment.startAppointment = moment(weekDays + ' ' + appointmentStartDate, 'DD hh:mm').toDate();
+    this.newAppointment.endAppointment = moment(weekDays + ' ' + appointmentEndDate, 'DD hh:mm').toDate();
     this.modalService.open(crear).result.then((result) => {
     }, (reason) => {
     });
+  }
+
+  addEvent(event: any) {
+    this.populateWeekDays(event.value.diff(this.recalculatedDate.startOf('day'), 'days'));
   }
 
 }

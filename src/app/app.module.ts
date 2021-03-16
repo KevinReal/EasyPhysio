@@ -13,6 +13,10 @@ import { HttpClientInMemoryWebApiModule } from 'angular-in-memory-web-api';
 import { InMemoryDataService } from './in-memory-data.service';
 import { FormsModule } from '@angular/forms';
 import { AppointmentsPipe } from './pipes/appointments.pipe';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatInputModule } from '@angular/material/input';
+import { MatMomentDateModule } from '@angular/material-moment-adapter';
+import { MAT_DATE_LOCALE } from '@angular/material/core';
 
 @NgModule({
   declarations: [
@@ -31,9 +35,12 @@ import { AppointmentsPipe } from './pipes/appointments.pipe';
     HttpClientInMemoryWebApiModule.forRoot(
       InMemoryDataService, { dataEncapsulation: false }
     ),
-    FormsModule
+    FormsModule,
+    MatDatepickerModule,
+    MatInputModule,
+    MatMomentDateModule
   ],
-  providers: [],
+  providers: [{provide: MAT_DATE_LOCALE, useValue: 'es_ES'},],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
