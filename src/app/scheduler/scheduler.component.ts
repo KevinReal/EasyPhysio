@@ -5,19 +5,22 @@ import { ScheduleService } from "../services/schedule.service";
 import { environment } from "../../environments/environment";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import * as moment from 'moment';
+import * as _ from "lodash";
 
 @Component({
   selector: 'app-scheduler',
   templateUrl: './scheduler.component.html',
   styleUrls: ['./scheduler.component.scss']
 })
+
 export class SchedulerComponent implements OnInit {
 
   numberColsGrid = environment.numberColsGrid;
   numberRowsGrid = environment.numberRowsGrid;
   workDays = environment.workDays;
-  workingHours = environment.workingHours;
+  hoursOfTheDay = environment.hoursOfTheDay;
   monthsOfTheYear = environment.monthsOfTheYear;
+  workingHours = environment.workingHours;
 
   recalculatedDate = moment();
   calendarDate = moment();
@@ -56,16 +59,18 @@ export class SchedulerComponent implements OnInit {
     this.scheduleService.deleteAppointment(appointment).subscribe(() => this.getAppointmentsByRangeOfDates());
   }
 
-  drop(event: CdkDragDrop<IAppointment[]>, workingHours: string, weekDays: number): void {
-    if (event.previousContainer === event.container) {
-      moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
-    } else {
-      transferArrayItem(event.previousContainer.data,
-        event.container.data,
-        event.previousIndex,
-        event.currentIndex);
-      event.container.data[0].startAppointment = moment(weekDays + ' ' + workingHours, 'DD hh:mm').toDate();
-      this.updateAppointment(event.container.data[0]);
+  drop(event: CdkDragDrop<IAppointment[]>, workingHour: string, weekDays: number): void {
+    if (_.indexOf(this.workingHours, workingHour) !== -1) {
+      if (event.previousContainer === event.container) {
+        moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
+      } else {
+        transferArrayItem(event.previousContainer.data,
+          event.container.data,
+          event.previousIndex,
+          event.currentIndex);
+        event.container.data[0].startAppointment = moment(weekDays + ' ' + workingHour, 'DD hh:mm').toDate();
+        this.updateAppointment(event.container.data[0]);
+      }
     }
   }
 

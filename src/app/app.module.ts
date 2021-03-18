@@ -17,13 +17,15 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatInputModule } from '@angular/material/input';
 import { MatMomentDateModule } from '@angular/material-moment-adapter';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
+import { CalculateWorkHoursPipe } from './pipes/calculate-work-hours.pipe';
 
 @NgModule({
   declarations: [
     AppComponent,
     SchedulerComponent,
     AppointmentComponent,
-    AppointmentsPipe
+    AppointmentsPipe,
+    CalculateWorkHoursPipe
   ],
   imports: [
     BrowserModule,

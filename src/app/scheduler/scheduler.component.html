@@ -6,13 +6,24 @@
         <span (click)="goToPreviousWeek()">< </span>
         <span (click)="goToNextWeek()"> ></span>
         <span>{{monthsOfTheYear[monthToDisplay]}} de {{yearToDisplay}}</span>
-        <span> aqui va boton de calendario?</span>
         <mat-form-field>
           <input matInput [matDatepicker]="picker" placeholder="Choose a date" [(ngModel)]="calendarDate" (dateChange)="addEvent($event)">
           <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
           <mat-datepicker #picker></mat-datepicker>
         </mat-form-field>
       </p>
+      <div class="row">
+        <div class="col">
+          <div ngbDropdown class="d-inline-block">
+            <button class="btn btn-outline-primary" id="dropdownChangeCalendarView" ngbDropdownToggle>Semana</button>
+            <div ngbDropdownMenu aria-labelledby="dropdownChangeCalendarView">
+              <button ngbDropdownItem>Día</button>
+              <button ngbDropdownItem>Semana</button>
+              <button ngbDropdownItem>Mes</button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
   <div class="row">
@@ -20,7 +31,7 @@
 
       <div class="height-first-row"></div>
 
-      <div *ngFor="let hour of workingHours; let i = index">
+      <div *ngFor="let hour of hoursOfTheDay; let i = index">
         <div class="first-column">
           <p class="transform-first-row-text">{{hour}}</p>
         </div>
@@ -37,20 +48,22 @@
 
       <div cdkDropListGroup class="scheduler-container" *ngIf="appointments">
         <div *ngFor="let row of numberRowsGrid; let i = index"
-             class="row">
+             class="row"
+             [ngClass]="{'disable-non-working-hours' : workingHours | calculateWorkHours: hoursOfTheDay[i]}">
           <div *ngFor="let col of numberColsGrid; let j = index"
-               (click)="openModalCreate(crear, workingHours[i],  weekDays[j], workingHours[i+1])"
+               (click)="openModalCreate(crear, hoursOfTheDay[i],  weekDays[j], hoursOfTheDay[i+1])"
                cdkDropList
                cdkDropListOrientation="horizontal"
-               [cdkDropListData]="appointments | appointments: workingHours[i] : weekDays[j]"
-               (cdkDropListDropped)="drop($event, workingHours[i], weekDays[j])"
-               class="col drop-list-grid">
-            <div *ngFor="let cita of appointments | appointments: workingHours[i] : weekDays[j]"
+               [cdkDropListData]="appointments | appointments: hoursOfTheDay[i] : weekDays[j]"
+               (cdkDropListDropped)="drop($event, hoursOfTheDay[i], weekDays[j])"
+               class="col drop-list-grid"
+          disabled>
+            <div *ngFor="let cita of appointments | appointments: hoursOfTheDay[i] : weekDays[j]"
                  (click)="openModal(editarBorrar, cita)"
                  cdkDragBoundary=".scheduler-container"
                  class="grid-scheduler"
                  cdkDrag>
-              <span *ngIf="(appointments | appointments: workingHours[i] : weekDays[j]).length < 3; else elseAppointmentLength">
+              <span *ngIf="(appointments | appointments: hoursOfTheDay[i] : weekDays[j]).length < 3; else elseAppointmentLength">
                 <p>{{cita.treatment.patient.name}} {{cita.treatment.patient.lastname}}</p>
                 <p>Sala {{cita.roomNumber}}</p>
                 <p>{{cita.reasonAppointment}}</p>
