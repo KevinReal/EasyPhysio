@@ -10,7 +10,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { DragDropModule } from "@angular/cdk/drag-drop";
 import { HttpClientModule } from '@angular/common/http';
 import { HttpClientInMemoryWebApiModule } from 'angular-in-memory-web-api';
-import { InMemoryDataService } from './in-memory-data.service';
+import { InMemoryDataService } from './services/in-memory-data.service';
 import { FormsModule } from '@angular/forms';
 import { AppointmentsPipe } from './pipes/appointments.pipe';
 import { MatDatepickerModule } from '@angular/material/datepicker';
@@ -18,6 +18,8 @@ import { MatInputModule } from '@angular/material/input';
 import { MatMomentDateModule } from '@angular/material-moment-adapter';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
 import { CalculateWorkHoursPipe } from './pipes/calculate-work-hours.pipe';
+import { ModalComponent } from './modal/modal.component';
+import { MAT_DIALOG_DEFAULT_OPTIONS } from "@angular/material/dialog";
 
 @NgModule({
   declarations: [
@@ -25,7 +27,8 @@ import { CalculateWorkHoursPipe } from './pipes/calculate-work-hours.pipe';
     SchedulerComponent,
     AppointmentComponent,
     AppointmentsPipe,
-    CalculateWorkHoursPipe
+    CalculateWorkHoursPipe,
+    ModalComponent
   ],
   imports: [
     BrowserModule,
@@ -42,7 +45,14 @@ import { CalculateWorkHoursPipe } from './pipes/calculate-work-hours.pipe';
     MatInputModule,
     MatMomentDateModule
   ],
-  providers: [{provide: MAT_DATE_LOCALE, useValue: 'es_ES'},],
+  providers: [AppointmentsPipe,
+              {provide: MAT_DATE_LOCALE, useValue: 'es_ES'},
+              {provide: MAT_DIALOG_DEFAULT_OPTIONS,
+                useValue: {
+                  height: "60vh",
+                  width: "60vw"
+                }
+              }],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

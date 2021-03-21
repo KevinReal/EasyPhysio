@@ -10,6 +10,7 @@ import { catchError } from "rxjs/operators";
 @Injectable({
   providedIn: 'root'
 })
+
 export class ScheduleService {
 
   constructor(private http: HttpClient) { }
@@ -31,7 +32,7 @@ export class ScheduleService {
       );
   }
 
-  addAppointment(appointment: IAppointment): Observable<IAppointment> {
+  createAppointment(appointment: IAppointment): Observable<IAppointment> {
     return this.http.post<IAppointment>(environment.appointmentsURL, appointment, environment.httpOptions)
       .pipe(
         catchError(this.handleError<IAppointment>('addAppointment'))

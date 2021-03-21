@@ -1,0 +1,101 @@
+<div *ngIf="data.appointments.length === 1">
+  <div class="modal-title">
+    {{data.title}}
+  </div>
+  <div class="modal-body">
+    <form>
+      <div class="form-group">
+        <label for="patient">Paciente:</label>
+        <div class="input-group">
+          <input id="patient"
+                 class="form-control"
+                 [disabled]="!canCreate"
+                 placeholder="Escriba nombre del paciente"
+                 name="patient"
+                 [(ngModel)]="data.appointments[0].treatment.patient.name">
+        </div>
+        <label for="room">Sala:</label>
+        <div class="input-group">
+          <input id="room"
+                 class="form-control"
+                 placeholder="Elija sala"
+                 type="number"
+                 name="room"
+                 [(ngModel)]="data.appointments[0].roomNumber">
+        </div>
+        <label for="reasonAppointment">Motivo de la cita:</label>
+        <div class="input-group">
+          <input id="reasonAppointment"
+                 class="form-control"
+                 placeholder="Escriba motivo de la cita"
+                 name="reasonAppointment"
+                 [(ngModel)]="data.appointments[0].reasonAppointment">
+        </div>
+        <label for="dateAppointment">Fecha de la cita:</label>
+        <div class="input-group">
+          <mat-form-field>
+            <input matInput
+                   name="dateAppointment"
+                   id="dateAppointment"
+                   [matDatepicker]="picker"
+                   placeholder="Escoja una fecha"
+                   [(ngModel)]="data.appointments[0].startAppointment"
+                   (dateChange)="changeDateSelected($event)">
+            <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+          </mat-form-field>
+        </div>
+        <label for="startAppointment">Hora de la cita:</label>
+        <div class="input-group">
+          <select name="startAppointment" id="startAppointment" [(ngModel)]="selectedHour">
+            <option *ngFor="let workingHour of workingHours"
+                    [value]="workingHour">
+              {{workingHour}}
+            </option>
+          </select>
+        </div>
+      </div>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <button *ngIf="canEdit"
+            type="button"
+            class="btn btn-outline-dark"
+            (click)="updateAppointment(data.appointments[0])">Editar</button>
+    <button *ngIf="canDelete"
+            type="button"
+            class="btn btn-outline-dark"
+            (click)="deleteAppointment(data.appointments[0])">Borrar</button>
+    <button *ngIf="canCreate"
+            type="button"
+            class="btn btn-outline-dark"
+            (click)="createAppointment(data.appointments[0])">Crear</button>
+  </div>
+</div>
+
+<div *ngIf="data.appointments.length > 1">
+  <div class="grid-scheduler" *ngFor="let appointment of data.appointments; let i = index">
+    <div *ngIf="!flagsEditAppointment[i]">
+      <p>{{appointment.treatment.patient.name}} {{appointment.treatment.patient.lastname}}</p>
+      <p>Sala {{appointment.roomNumber}}</p>
+      <p>{{appointment.reasonAppointment}}</p>
+      <button (click)="swapEditAppointment(i)">swap</button>
+    </div>
+    <div *ngIf="flagsEditAppointment[i]">
+      <button (click)="swapEditAppointment(i)">swap</button>
+      <button *ngIf="canEdit"
+              type="button"
+              class="btn btn-outline-dark"
+              (click)="updateAppointment(appointment)">Editar</button>
+      <button *ngIf="canDelete"
+              type="button"
+              class="btn btn-outline-dark"
+              (click)="deleteAppointment(appointment)">Borrar</button>
+      <button *ngIf="canCreate"
+              type="button"
+              class="btn btn-outline-dark"
+              (click)="createAppointment(appointment)">Crear</button>
+    </div>
+  </div>
+</div>
+

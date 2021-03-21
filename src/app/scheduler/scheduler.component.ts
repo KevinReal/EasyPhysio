@@ -3,9 +3,11 @@ import { CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/dr
 import { IAppointment } from "../models/IAppointment";
 import { ScheduleService } from "../services/schedule.service";
 import { environment } from "../../environments/environment";
-import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import * as moment from 'moment';
 import * as _ from "lodash";
+import { MatDialog } from "@angular/material/dialog";
+import { ModalComponent } from "../modal/modal.component";
+import { AppointmentsPipe } from "../pipes/appointments.pipe";
 
 @Component({
   selector: 'app-scheduler',
@@ -31,11 +33,11 @@ export class SchedulerComponent implements OnInit {
   weekDays: number[] = [];
 
   appointments: IAppointment[] = [];
-  selectedAppointment: IAppointment = {} as IAppointment;
   newAppointment: IAppointment = { treatment: { patient: {}}} as IAppointment;
 
   constructor(private scheduleService: ScheduleService,
-              private modalService: NgbModal) { }
+              private matDialog: MatDialog,
+              private appointmentPipe: AppointmentsPipe) { }
 
   ngOnInit() {
     this.goToToday();
@@ -51,8 +53,8 @@ export class SchedulerComponent implements OnInit {
     this.scheduleService.updateAppointment(appointment).subscribe(() => this.getAppointmentsByRangeOfDates());
   }
 
-  addAppointment(appointment: IAppointment): void {
-    this.scheduleService.addAppointment(appointment).subscribe(()=> this.getAppointmentsByRangeOfDates());
+  createAppointment(appointment: IAppointment): void {
+    this.scheduleService.createAppointment(appointment).subscribe(()=> this.getAppointmentsByRangeOfDates());
   }
 
   deleteAppointment(appointment: IAppointment): void {
@@ -69,20 +71,21 @@ export class SchedulerComponent implements OnInit {
           event.previousIndex,
           event.currentIndex);
         event.container.data[0].startAppointment = moment(weekDays + ' ' + workingHour, 'DD hh:mm').toDate();
+        event.container.data[0].endAppointment = moment(event.container.data[0].startAppointment).add(30, 'minutes').toDate();
         this.updateAppointment(event.container.data[0]);
       }
     }
   }
 
-  goToToday() {
+  goToToday(): void {
     this.populateWeekDays(0);
   }
 
-  goToPreviousWeek() {
+  goToPreviousWeek(): void {
     this.populateWeekDays(-7);
   }
 
-  goToNextWeek() {
+  goToNextWeek(): void {
     this.populateWeekDays(7);
   }
 
@@ -150,25 +153,72 @@ export class SchedulerComponent implements OnInit {
     this.getAppointmentsEndDate = moment(this.weekDays[4], "D").endOf('day');
   }
 
-  openModal(editarBorrar:any, cita: IAppointment) {
-    this.selectedAppointment = cita;
+  changeDateSelected(event: any): void {
+    this.populateWeekDays(event.value.diff(this.recalculatedDate.startOf('day'), 'days'));
+  }
 
-    this.modalService.open(editarBorrar).result.then((result) => {
-    }, (reason) => {
+  openModalEditDelete(appointment: IAppointment): void {
+    let appointments = [];
+    appointments.push(JSON.parse(JSON.stringify(appointment)));
+
+    const modalDialog = this.matDialog.open(ModalComponent,
+      {
+        data: {
+          title: 'Detalles de la cita:',
+          appointments: appointments,
+          actions: ['Edit', 'Delete']
+        }
+      });
+
+    modalDialog.afterClosed().subscribe(result => {
+      if (result.action === 'Edit') {
+        this.updateAppointment(result.appointment);
+      } else if (result.action === 'Delete') {
+        this.deleteAppointment(result.appointment);
+      }
     });
   }
 
-  openModalCreate(crear: any, appointmentStartDate: string, weekDays: number, appointmentEndDate: string) {
-    this.newAppointment.dateAppointment = moment(weekDays + ' ' + appointmentStartDate, 'DD hh:mm').toDate();
+  openModalCreate(appointmentStartDate: string, weekDays: number, appointmentEndDate: string): void {
+    this.newAppointment = { treatment: { patient: {}}} as IAppointment;
     this.newAppointment.startAppointment = moment(weekDays + ' ' + appointmentStartDate, 'DD hh:mm').toDate();
     this.newAppointment.endAppointment = moment(weekDays + ' ' + appointmentEndDate, 'DD hh:mm').toDate();
-    this.modalService.open(crear).result.then((result) => {
-    }, (reason) => {
+    let appointments = [];
+    appointments.push(this.newAppointment);
+
+    const modalDialog = this.matDialog.open(ModalComponent,
+      {
+        data: {
+          title: 'Crear una nueva cita:',
+          appointments: appointments,
+          actions: ['Create']
+        }
+      });
+
+    modalDialog.afterClosed().subscribe(result => {
+      if (result.action === 'Create') {
+        this.createAppointment(result.appointment);
+      }
     });
   }
 
-  addEvent(event: any) {
-    this.populateWeekDays(event.value.diff(this.recalculatedDate.startOf('day'), 'days'));
+  openModalGroupedAppointments(appointments: any, workingHours: string, weekDays: number): void {
+    const modalDialog = this.matDialog.open(ModalComponent,
+      {
+        data: {
+          title: 'Lista de citas agendadas:',
+          appointments: this.appointmentPipe.transform(appointments, workingHours, weekDays),
+          actions: ['Edit', 'Delete']
+        }
+      });
+
+    modalDialog.afterClosed().subscribe(result => {
+      if (result.action === 'Edit') {
+        this.updateAppointment(result.appointment);
+      } else if (result.action === 'Delete') {
+        this.deleteAppointment(result.appointment);
+      }
+    });
   }
 
 }

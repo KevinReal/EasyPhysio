@@ -3,7 +3,6 @@ import { IPass } from "./IPass";
 
 export interface IAppointment {
   id: number;
-  dateAppointment: Date;
   startAppointment: Date;
   endAppointment: Date;
   reasonAppointment: string;

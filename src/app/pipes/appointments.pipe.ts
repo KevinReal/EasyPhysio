@@ -6,6 +6,7 @@ import * as _ from 'lodash';
 @Pipe({
   name: 'appointments'
 })
+
 export class AppointmentsPipe implements PipeTransform {
 
   transform(appointments: any, workingHours: string, weekDays: number): IAppointment[] {

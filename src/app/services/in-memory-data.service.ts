@@ -1,19 +1,19 @@
 import { Injectable } from '@angular/core';
 import { InMemoryDbService } from 'angular-in-memory-web-api';
-import {IAppointment} from "./models/IAppointment";
-import {ITreatment} from "./models/ITreatment";
-import {IPhysio} from "./models/IPhysio";
-import {IPatient} from "./models/IPatient";
+import { IAppointment } from "../models/IAppointment";
+import { ITreatment } from "../models/ITreatment";
+import { IPhysio } from "../models/IPhysio";
+import { IPatient } from "../models/IPatient";
 
 @Injectable({
   providedIn: 'root',
 })
+
 export class InMemoryDataService implements InMemoryDbService {
   createDb() {
     const appointments: IAppointment[] = [
       {
         id: 1,
-        dateAppointment: new Date(),
         startAppointment: new Date('March 15, 2021 12:00:00'),
         endAppointment: new Date(),
         reasonAppointment: 'Zona lumbar',
@@ -38,7 +38,6 @@ export class InMemoryDataService implements InMemoryDbService {
       },
       {
         id: 2,
-        dateAppointment: new Date(),
         startAppointment: new Date('March 15, 2021 12:00:00'),
         endAppointment: new Date(),
         reasonAppointment: 'Core',
@@ -63,7 +62,6 @@ export class InMemoryDataService implements InMemoryDbService {
       },
       {
         id: 3,
-        dateAppointment: new Date(),
         startAppointment: new Date('March 16, 2021 12:30:00'),
         endAppointment: new Date(),
         reasonAppointment: 'me duele todo :(',
@@ -88,7 +86,6 @@ export class InMemoryDataService implements InMemoryDbService {
       },
       {
         id: 4,
-        dateAppointment: new Date(),
         startAppointment: new Date('March 17, 2021 13:00:00'),
         endAppointment: new Date(),
         reasonAppointment: 'me lo dijo el médico',
