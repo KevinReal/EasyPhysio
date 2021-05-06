@@ -2,21 +2,144 @@
 
 /* Importing Bootstrap SCSS file. */
 @import '~bootstrap/scss/bootstrap';
+@import 'app/variables';
 
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 
-
 .grid-scheduler {
   border: 1px solid black;
-  height: 15vh;
+  height: 5vh;
   padding: 1vh;
-  background: greenyellow;
+  background: black;
+  color: white;
   flex-grow: 1;
   flex-basis: 0;
   border-radius: 10px;
+  cursor: pointer;
 }
 
-.grid-scheduler:hover {
+.button {
+  margin: 0 10px;
+  color: #000;
+  border-radius: 10px;
+  padding: 0.375rem 0.75rem;
+}
+
+.secondary-btn, .cancel-btn {
+  background-color: $secondary-color;
+  border-color: $secondary-color;
+}
+
+.secondary-btn:hover, .cancel-btn:hover {
+  background-color: $secondary-color-hover;
+}
+
+.edit-btn {
+  background-color: $edit-color;
+  border-color: $edit-color;
+}
+
+.edit-btn:hover {
+  background-color: $edit-color-hover;
+}
+
+.delete-btn {
+  background-color: $warn-color;
+  border-color: $warn-color;
+}
+
+.delete-btn:hover {
+  background-color: $warn-color-hover;
+}
+
+.create-btn {
+  background-color: $tertiary-color;
+  border-color: $tertiary-color;
+}
+
+.create-btn:hover {
+  background-color: $tertiary-color-hover;
+}
+
+.row {
+  margin: 0;
+}
+
+.custom-modalbox {
+  mat-dialog-container {
+    position: relative;
+    padding: 0;
+  }
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type=number] {
+  -moz-appearance: textfield;
+}
+
+.form-control:disabled {
+  color: $primary-color;
+  cursor: not-allowed;
+}
+
+.toast-success {
+  color: black;
+  background-color: $tertiary-color;
+}
+
+.toast-success:hover {
+  background-color: $tertiary-color-hover;
   cursor: pointer;
+}
+
+.toast-warn {
+  color: black;
+  background-color: $warn-color;
+}
+
+.toast-warn:hover {
+  background-color: $warn-color-hover;
+  cursor: pointer;
+}
+
+.physio-bg1 {
+  color: white;
+  background-color: $physio1-color;
+}
+
+.physio-bg2 {
+  color: white;
+  background-color: $physio2-color;
+}
+
+.physio-bg3 {
+  color: white;
+  background-color: $physio3-color;
+}
+
+.physio-bg4 {
+  color: white;
+  background-color: $physio4-color;
+}
+
+.physio1 {
+  color: $physio1-color;
+}
+
+.physio2 {
+  color: $physio2-color;
+}
+
+.physio3 {
+  color: $physio3-color;
+}
+
+.physio4 {
+  color: $physio4-color;
 }

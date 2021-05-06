@@ -1,0 +1,30 @@
+@import '~@angular/material/theming';
+@import "app/variables";
+
+@include mat-core();
+
+$primary: (
+  500: $primary-color,
+  contrast: (
+    500: $dark-primary-text,
+  )
+);
+
+$accent: (
+  500: $tertiary-color,
+  contrast: (
+    500: $dark-primary-text,
+  )
+);
+
+$candy-app-primary: mat-palette($primary);
+$candy-app-accent:  mat-palette($accent);
+
+$candy-app-theme: mat-light-theme((
+  color: (
+    primary: $candy-app-primary,
+    accent: $candy-app-accent
+  )
+));
+
+@include angular-material-theme($candy-app-theme);
