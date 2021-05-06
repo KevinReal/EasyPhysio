@@ -5,7 +5,6 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { SchedulerComponent } from './scheduler/scheduler.component';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
-import { AppointmentComponent } from './appointment/appointment.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { DragDropModule } from "@angular/cdk/drag-drop";
 import { HttpClientModule } from '@angular/common/http';
@@ -20,15 +19,17 @@ import { MAT_DATE_LOCALE } from '@angular/material/core';
 import { CalculateWorkHoursPipe } from './pipes/calculate-work-hours.pipe';
 import { ModalComponent } from './modal/modal.component';
 import { MAT_DIALOG_DEFAULT_OPTIONS } from "@angular/material/dialog";
+import { MatCheckboxModule } from "@angular/material/checkbox";
+import { ToastContainerComponent } from './toast-container/toast-container.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     SchedulerComponent,
-    AppointmentComponent,
     AppointmentsPipe,
     CalculateWorkHoursPipe,
-    ModalComponent
+    ModalComponent,
+    ToastContainerComponent
   ],
   imports: [
     BrowserModule,
@@ -38,21 +39,24 @@ import { MAT_DIALOG_DEFAULT_OPTIONS } from "@angular/material/dialog";
     DragDropModule,
     HttpClientModule,
     HttpClientInMemoryWebApiModule.forRoot(
-      InMemoryDataService, { dataEncapsulation: false }
+      InMemoryDataService, {dataEncapsulation: false}
     ),
     FormsModule,
     MatDatepickerModule,
     MatInputModule,
-    MatMomentDateModule
+    MatMomentDateModule,
+    MatCheckboxModule
   ],
   providers: [AppointmentsPipe,
               {provide: MAT_DATE_LOCALE, useValue: 'es_ES'},
               {provide: MAT_DIALOG_DEFAULT_OPTIONS,
                 useValue: {
-                  height: "60vh",
-                  width: "60vw"
+                  height: "80vh",
+                  width: "70vw",
+                  hasBackdrop: true
                 }
               }],
   bootstrap: [AppComponent]
 })
+
 export class AppModule { }
