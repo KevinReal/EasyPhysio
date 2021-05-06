@@ -1,82 +1,93 @@
-<div class="main-container">
-  <div class="row header-container">
-    <div class="col-12 calendar-container">
-      <p>
-        <span (click)="goToToday()">Hoy</span>
-        <span (click)="goToPreviousWeek()">< </span>
-        <span (click)="goToNextWeek()"> ></span>
-        <span>{{monthsOfTheYear[monthToDisplay]}} de {{yearToDisplay}}</span>
-        <mat-form-field>
-          <input matInput
-                 [matDatepicker]="picker"
-                 placeholder="Choose a date"
-                 [(ngModel)]="calendarDate"
-                 (dateChange)="changeDateSelected($event)">
-          <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-          <mat-datepicker #picker></mat-datepicker>
-        </mat-form-field>
-      </p>
-      <div class="row">
-        <div class="col">
-          <div ngbDropdown class="d-inline-block">
-            <button class="btn btn-outline-primary" id="dropdownChangeCalendarView" ngbDropdownToggle>Semana</button>
-            <div ngbDropdownMenu aria-labelledby="dropdownChangeCalendarView">
-              <button ngbDropdownItem>Día</button>
-              <button ngbDropdownItem>Semana</button>
-              <button ngbDropdownItem>Mes</button>
-            </div>
+<div class="row">
+  <div class="col-6 calendar-container">
+    <button ngbPopover="{{today.format('dddd DD MMMM')}}"
+            triggers="mouseenter:mouseleave"
+            type="button" class="button secondary-btn"
+            (click)="goToToday()">
+      Hoy
+    </button>
+    <span id="date-to-display">{{monthsOfTheYear[monthToDisplay]}} de {{yearToDisplay}}</span>
+    <span ngbPopover="Semana anterior" triggers="mouseenter:mouseleave" class="arrow" (click)="goToPreviousWeek()"><</span>
+    <input id="datepicker-input"
+           matInput
+           [matDatepicker]="picker"
+           [(ngModel)]="calendarDate"
+           (dateChange)="changeDateSelected($event)">
+    <mat-datepicker-toggle id="calendar-icon" matSuffix [for]="picker"></mat-datepicker-toggle>
+    <mat-datepicker #picker color="accent"></mat-datepicker>
+    <span ngbPopover="Semana siguiente" triggers="mouseenter:mouseleave" class="arrow" (click)="goToNextWeek()">></span>
+    <span ngbDropdown class="d-inline-block">
+          <button class="button secondary-btn" id="dropdownChangeCalendarView" ngbDropdownToggle>Semana</button>
+          <span ngbDropdownMenu aria-labelledby="dropdownChangeCalendarView">
+            <button ngbDropdownItem>Día</button>
+            <button ngbDropdownItem>Semana</button>
+            <button ngbDropdownItem>Mes</button>
+          </span>
+        </span>
+  </div>
+  <div class="col-6 calendar-container">
+    <div class="row">
+      <div class="col-4" *ngFor="let physio of physios; let i = index">
+        <mat-checkbox color="accent"
+                      [checked]="true"
+                      (change)="changeFilterPhysios(physio, $event)"
+                      id="physio{{i}}"
+                      name="physio{{i}}"
+                      [value]="physio.dni">
+          <div [ngClass]="addPhysioColor(physio.dni, false)"
+               class="truncate-physios-names"
+               ngbPopover="{{physio.name}} {{physio.lastname}}"
+               triggers="mouseenter:mouseleave">
+            <strong>{{physio.name}} {{physio.lastname}}</strong>
           </div>
-        </div>
+        </mat-checkbox>
       </div>
     </div>
   </div>
-  <div class="row">
-    <div class="col-1">
-      <div class="height-first-row"></div>
-      <div *ngFor="let hour of hoursOfTheDay; let i = index">
-        <div class="first-column">
-          <p class="transform-first-row-text">{{hour}}</p>
-        </div>
+</div>
+<div class="row weekdays-container">
+  <div class="col-1"></div>
+  <div class="col" *ngFor="let day of workDays; let i = index">
+    <p class="align-center">{{day}}</p>
+    <p class="align-center">{{weekDays[i]}}</p>
+  </div>
+</div>
+<div class="row grid-container">
+  <div class="col-1">
+    <div *ngFor="let hour of hoursOfTheDay; let i = index">
+      <div class="first-column">
+        <p>{{hour}}</p>
       </div>
     </div>
-    <div class="col-11">
-      <div class="row height-first-row">
-        <div class="col" *ngFor="let day of workDays; let i = index">
-          <p class="align-center">{{day}}</p>
-          <p class="align-center">{{weekDays[i]}}</p>
-        </div>
-      </div>
-      <div cdkDropListGroup class="scheduler-container" *ngIf="appointments">
-        <div *ngFor="let row of numberRowsGrid; let i = index"
-             class="row"
-             [ngClass]="{'disable-non-working-hours' : workingHours | calculateWorkHours: hoursOfTheDay[i]}">
-          <div *ngFor="let col of numberColsGrid; let j = index"
-               (click)="openModalCreate(hoursOfTheDay[i],  weekDays[j], hoursOfTheDay[i+1])"
-               cdkDropList
-               cdkDropListOrientation="horizontal"
-               [cdkDropListData]="appointments | appointments: hoursOfTheDay[i] : weekDays[j]"
-               (cdkDropListDropped)="drop($event, hoursOfTheDay[i], weekDays[j])"
-               class="col drop-list-grid"
-          disabled>
-            <div *ngFor="let appointment of appointments | appointments: hoursOfTheDay[i] : weekDays[j]; let x = index"
-                 (click)="openModalEditDelete(appointment); $event.stopPropagation()"
-                 cdkDragBoundary=".scheduler-container"
-                 cdkDrag>
-              <div class="grid-scheduler"
-                    *ngIf="(appointments | appointments: hoursOfTheDay[i] : weekDays[j]).length < 3; else elseAppointmentLength">
-                <p>{{appointment.treatment.patient.name}} {{appointment.treatment.patient.lastname}}</p>
-                <p>Sala {{appointment.roomNumber}}</p>
-                <p>{{appointment.reasonAppointment}}</p>
-              </div>
-              <ng-template #elseAppointmentLength>
-                <div (click)="openModalGroupedAppointments(appointments, hoursOfTheDay[i], weekDays[j]); $event.stopPropagation()"
-                     class="grid-scheduler"
-                     *ngIf="x === 0">
-                  <p>Hay {{(appointments | appointments: hoursOfTheDay[i] : weekDays[j]).length}} citas agrupadas.</p>
-                  <p>Click para ver detalles.</p>
-                </div>
-              </ng-template>
+  </div>
+  <div class="col-11">
+    <div cdkDropListGroup class="scheduler-container" *ngIf="appointments">
+      <div *ngFor="let row of numberRowsGrid; let i = index"
+           class="row"
+           [ngClass]="{'disable-non-working-hours' : workingHours | calculateWorkHours: hoursOfTheDay[i]}">
+        <div *ngFor="let col of numberColsGrid; let j = index"
+             (click)="openModalCreate(hoursOfTheDay[i],  weekDays[j], hoursOfTheDay[i+1])"
+             cdkDropList
+             cdkDropListOrientation="horizontal"
+             [cdkDropListData]="appointments | appointments: hoursOfTheDay[i] : weekDays[j] : recalculatedDate : physiosFilter"
+             (cdkDropListDropped)="drop($event, hoursOfTheDay[i], weekDays[j])"
+             class="col drop-list-grid"
+             disabled>
+          <div *ngFor="let appointment of appointments | appointments: hoursOfTheDay[i] : weekDays[j] : recalculatedDate : physiosFilter; let x = index"
+               (click)="openModalEditDelete(appointment); $event.stopPropagation()"
+               cdkDragBoundary=".scheduler-container"
+               cdkDrag>
+            <div class="grid-scheduler" [ngClass]="addPhysioColor(appointment.treatment.physio.dni, true)"
+                 *ngIf="(appointments | appointments: hoursOfTheDay[i] : weekDays[j] : recalculatedDate : physiosFilter).length < 4; else elseAppointmentLength">
+              <p>Sala {{appointment.roomNumber}}</p>
             </div>
+            <ng-template #elseAppointmentLength>
+              <div (click)="openModalGroupedAppointments(appointments, hoursOfTheDay[i], weekDays[j]); $event.stopPropagation()"
+                   class="grid-scheduler"
+                   *ngIf="x === 0">
+                <p><strong>{{(appointments | appointments: hoursOfTheDay[i] : weekDays[j] : recalculatedDate : physiosFilter).length}}</strong> citas agrupadas.</p>
+              </div>
+            </ng-template>
           </div>
         </div>
       </div>

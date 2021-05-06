@@ -1,59 +1,77 @@
-.main-container {
-  background-color: deepskyblue;
+@import '../variables';
+
+#datepicker-input {
+  visibility: hidden;
+  width: 0;
+}
+
+#date-to-display {
+  font-weight: bold;
+  margin: 0 5px;
+}
+
+#calendar-icon:hover {
+  color: $tertiary-color;
 }
 
 .align-center {
   text-align: center;
 }
 
-.height-first-row {
-  height: 10vh;
-}
-
 .first-column {
-  height: 15vh;
-  padding-left: 1vh;
-}
-
-.transform-first-row-text {
-  transform: translate(0px, -10px);
-}
-
-.last-item-first-row {
-  height: 17vh;
-  padding-left: 1vh;
-}
-
-.transform-last-item-first-row-text {
-  transform: translate(0px, -15px);
-}
-
-.empty-space {
-  height: 15vh;
-  margin:1vh 0;
-  background: grey;
+  height: 5vh;
+  text-align: center;
 }
 
 .drop-list-grid {
-  height: 15vh;
+  height: 5vh;
   display: flex;
   flex-direction: row;
-  border: 1px solid red;
+  justify-content: center;
+  border: 1px solid $secondary-color;
 }
 
 .cdk-drop-list-dragging {
-  cursor: move;
-}
-
-.header-container {
-  min-height: 20vh;
+  cursor: grabbing;
 }
 
 .calendar-container {
-  text-align: center;
-  padding: 5vh;
+  border-bottom: 1px solid $secondary-color;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3vh 0;
+  min-height: 10vh;
 }
 
 .disable-non-working-hours {
-  background-color: red;
+  background-color: $primary-color;
+  cursor: not-allowed;
+}
+
+.arrow {
+  margin-left: 10px;
+  cursor: pointer;
+  padding: 0 10px;
+  font-size: 24px;
+  border-radius: 20px;
+}
+
+.arrow:hover {
+  background-color: $tertiary-color;
+}
+
+.grid-container {
+  height: 72vh;
+  overflow: auto;
+}
+
+.weekdays-container {
+  margin-top: 5vh;
+}
+
+.truncate-physios-names {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 10vw;
 }

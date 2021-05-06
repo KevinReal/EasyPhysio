@@ -1,13 +1,15 @@
 import { Component, OnInit } from '@angular/core';
 import { CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 import { IAppointment } from "../models/IAppointment";
-import { ScheduleService } from "../services/schedule.service";
+import { AppointmentService } from "../services/appointment.service";
 import { environment } from "../../environments/environment";
 import * as moment from 'moment';
 import * as _ from "lodash";
 import { MatDialog } from "@angular/material/dialog";
 import { ModalComponent } from "../modal/modal.component";
 import { AppointmentsPipe } from "../pipes/appointments.pipe";
+import { IPhysio } from "../models/IPhysio";
+import { MatCheckboxChange } from "@angular/material/checkbox";
 
 @Component({
   selector: 'app-scheduler',
@@ -24,20 +26,34 @@ export class SchedulerComponent implements OnInit {
   monthsOfTheYear = environment.monthsOfTheYear;
   workingHours = environment.workingHours;
 
-  recalculatedDate = moment();
-  calendarDate = moment();
-  getAppointmentsStartDate = moment();
-  getAppointmentsEndDate = moment();
-  monthToDisplay = moment().month();
-  yearToDisplay = moment().year();
+  today;
+  recalculatedDate;
+  calendarDate;
+  getAppointmentsStartDate;
+  getAppointmentsEndDate;
+  monthToDisplay;
+  yearToDisplay;
   weekDays: number[] = [];
 
   appointments: IAppointment[] = [];
   newAppointment: IAppointment = { treatment: { patient: {}}} as IAppointment;
 
-  constructor(private scheduleService: ScheduleService,
+  flagToUpdateMonth = true;
+  physios: IPhysio[] = [{dni: '12345678K', name: 'Pepito', lastname: 'De los Palotes'}, {dni: '1234', name: 'Juanito', lastname: 'asdadad'}, {dni: '12', name: 'Jaimito', lastname: 'sin apellido'}, {dni: '1', name: 'Jaimito2', lastname: 'sin apellido2'}] as IPhysio[];
+  physiosFilter: string[] = [];
+
+  constructor(private scheduleService: AppointmentService,
               private matDialog: MatDialog,
-              private appointmentPipe: AppointmentsPipe) { }
+              private appointmentPipe: AppointmentsPipe) {
+    moment.locale('es');
+    this.today = moment();
+    this.recalculatedDate = moment();
+    this.calendarDate = moment();
+    this.getAppointmentsStartDate = moment();
+    this.getAppointmentsEndDate = moment();
+    this.monthToDisplay = moment().month();
+    this.yearToDisplay = moment().year();
+  }
 
   ngOnInit() {
     this.goToToday();
@@ -51,6 +67,10 @@ export class SchedulerComponent implements OnInit {
 
   updateAppointment(appointment: IAppointment): void {
     this.scheduleService.updateAppointment(appointment).subscribe(() => this.getAppointmentsByRangeOfDates());
+  }
+
+  updateListAppointments(appointments: IAppointment[]): void {
+    this.scheduleService.updateListAppointments(appointments).subscribe(() => this.getAppointmentsByRangeOfDates());
   }
 
   createAppointment(appointment: IAppointment): void {
@@ -92,7 +112,7 @@ export class SchedulerComponent implements OnInit {
   // TODO: control leap year
   populateWeekDays(daysToAdd: number): void {
     this.weekDays = [];
-    let flagToUpdateMonth = true;
+    this.flagToUpdateMonth = true;
     if (daysToAdd !== 0) {
       this.recalculatedDate = this.recalculatedDate.add(daysToAdd, 'days');
       this.monthToDisplay = this.recalculatedDate.month();
@@ -100,44 +120,7 @@ export class SchedulerComponent implements OnInit {
       this.calendarDate = moment(this.recalculatedDate);
       for (let i = 0; i <= 6; i++) {
         let dayOfWeek = this.recalculatedDate.date() - ((this.recalculatedDate.days() + 6) % 7) + i;
-        if (dayOfWeek <= 0) {
-          if (flagToUpdateMonth){
-            flagToUpdateMonth = !flagToUpdateMonth;
-            if (this.monthToDisplay === 0) {
-              this.monthToDisplay = 11;
-            } else {
-              this.monthToDisplay -= 1;
-            }
-          }
-          switch (this.monthToDisplay) {
-            case 0:
-            case 2:
-            case 4:
-            case 6:
-            case 7:
-            case 9:
-            case 11:
-              dayOfWeek += 31;
-              break;
-            case 1:
-              dayOfWeek += 28;
-              break;
-            default:
-              dayOfWeek += 30;
-              break;
-          }
-        } else if (dayOfWeek > 28 && this.monthToDisplay === 1) {
-          dayOfWeek -= 28;
-        } else if (dayOfWeek > 30 && (this.monthToDisplay === 3 || this.monthToDisplay === 5 ||
-                                      this.monthToDisplay === 8 || this.monthToDisplay === 10)) {
-          dayOfWeek -= 30;
-        } else if (dayOfWeek > 31 && (this.monthToDisplay === 0 || this.monthToDisplay === 2 ||
-                                      this.monthToDisplay === 4 || this.monthToDisplay === 6 ||
-                                      this.monthToDisplay === 7 || this.monthToDisplay === 9 ||
-                                      this.monthToDisplay === 11)) {
-          dayOfWeek -= 31;
-        }
-        this.weekDays.push(dayOfWeek);
+        this.weekDays.push(this.fixDaysFromWeek(dayOfWeek));
       }
     } else {
       this.recalculatedDate = moment();
@@ -146,11 +129,53 @@ export class SchedulerComponent implements OnInit {
       this.calendarDate = moment();
       for (let i = 0; i <= 6; i++) {
         let dayOfWeek = moment().date() - ((moment().days() + 6) % 7) + i ;
-        this.weekDays.push(dayOfWeek);
+        this.weekDays.push(this.fixDaysFromWeek(dayOfWeek));
       }
     }
     this.getAppointmentsStartDate = moment(this.weekDays[0], "D");
     this.getAppointmentsEndDate = moment(this.weekDays[4], "D").endOf('day');
+  }
+
+  fixDaysFromWeek(dayOfWeek: number): number {
+    if (dayOfWeek <= 0) {
+      if (this.flagToUpdateMonth){
+        this.flagToUpdateMonth = !this.flagToUpdateMonth;
+        if (this.monthToDisplay === 0) {
+          this.monthToDisplay = 11;
+          this.yearToDisplay = this.yearToDisplay - 1;
+        } else {
+          this.monthToDisplay -= 1;
+        }
+      }
+      switch (this.monthToDisplay) {
+        case 0:
+        case 2:
+        case 4:
+        case 6:
+        case 7:
+        case 9:
+        case 11:
+          dayOfWeek += 31;
+          break;
+        case 1:
+          dayOfWeek += 28;
+          break;
+        default:
+          dayOfWeek += 30;
+          break;
+      }
+    } else if (dayOfWeek > 28 && this.monthToDisplay === 1) {
+      dayOfWeek -= 28;
+    } else if (dayOfWeek > 30 && (this.monthToDisplay === 3 || this.monthToDisplay === 5 ||
+      this.monthToDisplay === 8 || this.monthToDisplay === 10)) {
+      dayOfWeek -= 30;
+    } else if (dayOfWeek > 31 && (this.monthToDisplay === 0 || this.monthToDisplay === 2 ||
+      this.monthToDisplay === 4 || this.monthToDisplay === 6 ||
+      this.monthToDisplay === 7 || this.monthToDisplay === 9 ||
+      this.monthToDisplay === 11)) {
+      dayOfWeek -= 31;
+    }
+    return dayOfWeek;
   }
 
   changeDateSelected(event: any): void {
@@ -160,65 +185,113 @@ export class SchedulerComponent implements OnInit {
   openModalEditDelete(appointment: IAppointment): void {
     let appointments = [];
     appointments.push(JSON.parse(JSON.stringify(appointment)));
-
     const modalDialog = this.matDialog.open(ModalComponent,
       {
         data: {
           title: 'Detalles de la cita:',
           appointments: appointments,
           actions: ['Edit', 'Delete']
-        }
+        },
+        panelClass: 'custom-modalbox'
       });
 
     modalDialog.afterClosed().subscribe(result => {
-      if (result.action === 'Edit') {
+      if (result?.action === 'Edit') {
         this.updateAppointment(result.appointment);
-      } else if (result.action === 'Delete') {
+      } else if (result?.action === 'Delete') {
         this.deleteAppointment(result.appointment);
       }
     });
   }
 
   openModalCreate(appointmentStartDate: string, weekDays: number, appointmentEndDate: string): void {
-    this.newAppointment = { treatment: { patient: {}}} as IAppointment;
-    this.newAppointment.startAppointment = moment(weekDays + ' ' + appointmentStartDate, 'DD hh:mm').toDate();
-    this.newAppointment.endAppointment = moment(weekDays + ' ' + appointmentEndDate, 'DD hh:mm').toDate();
-    let appointments = [];
-    appointments.push(this.newAppointment);
+    if (_.findIndex(this.workingHours, function(hour) { return hour == appointmentStartDate; }) !== -1) {
+      this.newAppointment = { treatment: { patient: {}}} as IAppointment;
+      this.newAppointment.startAppointment = moment(weekDays + ' ' + appointmentStartDate, 'DD hh:mm').toDate();
+      this.newAppointment.endAppointment = moment(weekDays + ' ' + appointmentEndDate, 'DD hh:mm').toDate();
+      let appointments = [];
+      appointments.push(this.newAppointment);
 
+      const modalDialog = this.matDialog.open(ModalComponent,
+        {
+          data: {
+            title: 'Crear una nueva cita:',
+            appointments: appointments,
+            actions: ['Create']
+          },
+          panelClass: 'custom-modalbox'
+        });
+
+      modalDialog.afterClosed().subscribe(result => {
+        if (result?.action === 'Create') {
+          this.createAppointment(result.appointment);
+        }
+      });
+    }
+  }
+
+  openModalGroupedAppointments(appointments: IAppointment[], workingHours: string, weekDays: number): void {
+    let dayAndHourAppointments = moment(appointments[0].startAppointment);
     const modalDialog = this.matDialog.open(ModalComponent,
       {
         data: {
-          title: 'Crear una nueva cita:',
-          appointments: appointments,
-          actions: ['Create']
-        }
+          title: 'Citas agendadas ' +
+                  dayAndHourAppointments.date() + '/' +
+                  (dayAndHourAppointments.month() + 1) + '/' +
+                  dayAndHourAppointments.year() + ' ' +
+                  workingHours + ' :',
+          appointments: JSON.parse(JSON.stringify(this.appointmentPipe.transform(appointments,
+                                                                                 workingHours,
+                                                                                 weekDays,
+                                                                                 this.recalculatedDate,
+                                                                                 this.physiosFilter))),
+          actions: ['Edit', 'Delete']
+        },
+        panelClass: 'custom-modalbox'
       });
 
     modalDialog.afterClosed().subscribe(result => {
-      if (result.action === 'Create') {
-        this.createAppointment(result.appointment);
+      if (result?.action === 'Edit') {
+        this.updateListAppointments(result.appointments);
+      } else if (result?.action === 'Delete') {
+        this.deleteAppointment(result.appointment);
       }
     });
   }
 
-  openModalGroupedAppointments(appointments: any, workingHours: string, weekDays: number): void {
-    const modalDialog = this.matDialog.open(ModalComponent,
-      {
-        data: {
-          title: 'Lista de citas agendadas:',
-          appointments: this.appointmentPipe.transform(appointments, workingHours, weekDays),
-          actions: ['Edit', 'Delete']
-        }
+  changeFilterPhysios(physio: IPhysio, event: MatCheckboxChange): void {
+    if (!event.checked) {
+      this.physiosFilter.push(physio.dni);
+      this.getAppointmentsByRangeOfDates();
+    } else {
+      this.physiosFilter = _.remove(this.physiosFilter, function(e) {
+        return e !== physio.dni
       });
+    }
+  }
 
-    modalDialog.afterClosed().subscribe(result => {
-      if (result.action === 'Edit') {
-        this.updateAppointment(result.appointment);
-      } else if (result.action === 'Delete') {
-        this.deleteAppointment(result.appointment);
-      }
-    });
+  addPhysioColor(dni: string, bg: boolean): string {
+    let physio = 'physio';
+    if (bg) {
+      physio += '-bg';
+    }
+    switch (dni) {
+      case '1':
+        physio += '1';
+        break;
+      case '12':
+        physio += '2';
+        break;
+      case '1234':
+        physio += '3';
+        break;
+      case '12345678K':
+        physio += '4';
+        break;
+      default:
+        break;
+    }
+    return physio;
   }
 
 }

@@ -1,0 +1,70 @@
+@import "src/app/variables";
+
+mat-form-field {
+  width: 50%;
+  float: left;
+  clear: both;
+}
+
+#list-appointments-container {
+  overflow: auto;
+  height: 58vh;
+}
+
+.container-close-modal {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.icon-close-modal, .icon-delete-appointment {
+  padding: 5px 10px;
+  margin: 15px 15px 0 0;
+  font-weight: bold;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.icon-close-modal:hover {
+  background-color: $tertiary-color;
+}
+
+.icon-delete-appointment:hover {
+  background-color: $warn-color-hover;
+}
+
+.header-modal {
+  padding: 2vh;
+  display: flex;
+  justify-content: center;
+  border-bottom: 1px solid $secondary-color;
+  font-weight: bold;
+  font-size: 20px;
+}
+
+.footer-modal {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  border-top: 1px solid $secondary-color;
+  padding: 2vh;
+  position: absolute;
+  bottom: 0;
+}
+
+.row-modal {
+  margin: 5vh 0;
+  padding: 0 5vw;
+}
+
+.label-modal {
+  font-weight: bold;
+  float: left;
+  clear: both;
+}
+
+.list-appointments-modal {
+  border: 1px solid black;
+  margin: 3vh 0 3vh 4vw;
+  border-radius: 10px;
+}

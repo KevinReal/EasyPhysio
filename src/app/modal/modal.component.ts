@@ -18,8 +18,7 @@ export class ModalComponent implements OnInit {
   canDelete = false;
   canCreate = false;
   workingHours = environment.workingHours;
-  selectedHour = '';
-  flagsEditAppointment: boolean[] = [];
+  selectedHour: string [] = [];
 
   constructor(private dialogRef: MatDialogRef<ModalComponent>,
               @Inject(MAT_DIALOG_DATA)
@@ -31,17 +30,17 @@ export class ModalComponent implements OnInit {
 
 
   ngOnInit() {
-    this.selectedHour = moment(this.data.appointments[0].startAppointment).format("HH") +
-                        ':' +
-                        moment(this.data.appointments[0].startAppointment).format("mm");
-    this.data.appointments.forEach(() => this.flagsEditAppointment.push(false));
+    this.data.appointments.forEach(appointment =>
+                                  this.selectedHour.push(moment(appointment.startAppointment).format("HH") +
+                                  ':' +
+                                  moment(appointment.startAppointment).format("mm")));
     this.canEdit = _.includes(this.data.actions, 'Edit');
     this.canDelete = _.includes(this.data.actions, 'Delete');
     this.canCreate = _.includes(this.data.actions, 'Create');
   }
 
   updateAppointment(appointment: IAppointment): void {
-    appointment.startAppointment = moment(moment(this.data.appointments[0].startAppointment).date() + ' ' + this.selectedHour, 'DD hh:mm').toDate();
+    appointment.startAppointment = this.startAppointment(appointment.startAppointment, this.selectedHour[0]);
     appointment.endAppointment = moment(appointment.startAppointment).add(30, 'minutes').toDate();
     let result = {
       appointment: appointment,
@@ -59,7 +58,7 @@ export class ModalComponent implements OnInit {
   }
 
   createAppointment(appointment: IAppointment): void {
-    appointment.startAppointment = moment(moment(this.data.appointments[0].startAppointment).date() + ' ' + this.selectedHour, 'DD hh:mm').toDate();
+    appointment.startAppointment = this.startAppointment(appointment.startAppointment, this.selectedHour[0]);
     appointment.endAppointment = moment(appointment.startAppointment).add(30, 'minutes').toDate();
     let result = {
       appointment: appointment,
@@ -68,11 +67,62 @@ export class ModalComponent implements OnInit {
     this.dialogRef.close(result);
   }
 
-  swapEditAppointment(index: number) {
-    this.flagsEditAppointment[index] = !this.flagsEditAppointment[index];
+  updateListAppointments(appointments: IAppointment[]): void {
+    for (let i = 0; i < appointments.length; i++) {
+      appointments[i].startAppointment = this.startAppointment(this.data.appointments[i].startAppointment, this.selectedHour[i]);
+      appointments[i].endAppointment = moment(appointments[i].startAppointment).add(30, 'minutes').toDate();
+    }
+    let result = {
+      appointments: appointments,
+      action: 'Edit'
+    }
+    this.dialogRef.close(result);
   }
 
-  changeDateSelected(event: any): void {
-
+  closeDialog() {
+    this.dialogRef.close();
   }
+
+  startAppointment(startAppointment: Date, selectedHour: string) {
+    return moment(moment(startAppointment).year() + ' ' +
+                  (moment(startAppointment).month() + 1) + ' ' +
+                  moment(startAppointment).date() + ' ' +
+                  selectedHour, 'yyyy MM DD hh:mm').toDate();
+  }
+
+  onSubmitAppointment(appointment: IAppointment) {
+    if (this.canEdit) {
+      this.updateAppointment(appointment)
+    } else if (this.canCreate) {
+      this.createAppointment(appointment);
+    }
+  }
+
+  onSubmitListAppointments(appointments: IAppointment[]) {
+    if (this.canEdit) {
+      this.updateListAppointments(appointments);
+    }
+  }
+
+  addPhysioColor(dni: string): string {
+    let physio = 'physio-bg';
+    switch (dni) {
+      case '1':
+        physio += '1';
+        break;
+      case '12':
+        physio += '2';
+        break;
+      case '1234':
+        physio += '3';
+        break;
+      case '12345678K':
+        physio += '4';
+        break;
+      default:
+        break;
+    }
+    return physio;
+  }
+
 }
