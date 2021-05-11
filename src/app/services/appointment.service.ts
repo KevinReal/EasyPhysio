@@ -1,11 +1,9 @@
 import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { IAppointment } from "../models/IAppointment";
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { environment } from '../../environments/environment';
-import { Moment } from "moment";
 import { catchError, map } from "rxjs/operators";
 import { ToastService } from "./toast.service";
+import { AngularFirestore, AngularFirestoreCollection } from "@angular/fire/firestore";
 
 @Injectable({
   providedIn: 'root'
@@ -13,61 +11,48 @@ import { ToastService } from "./toast.service";
 
 export class AppointmentService {
 
-  constructor(private http: HttpClient,
-              private toastService: ToastService) { }
+  private appointmentAngularFirestoreCollection: AngularFirestoreCollection<IAppointment> | undefined;
 
-  getAppointmentsByRangeOfDates(startDate: Moment, endDate: Moment ): Observable<IAppointment[]> {
-    const options = { params: new HttpParams()
-                              .set('startDate', startDate.toISOString())
-                              .set('endDate', endDate.toISOString())};
-    return this.http.get<IAppointment[]>(environment.appointmentsURL)
-      .pipe(
-        catchError(this.handleError<IAppointment[]>('getAppointments', []))
-      );
+  constructor(private toastService: ToastService,
+              private angularFire: AngularFirestore) { }
+
+  getAppointments() {
+    this.appointmentAngularFirestoreCollection = this.angularFire.collection("appointments");
+    return this.appointmentAngularFirestoreCollection.snapshotChanges().pipe(
+      map(appointments => appointments.map(appointment=>{
+        const data = appointment.payload.doc.data() ;
+        const id = appointment.payload.doc.id;
+        // @ts-ignore
+        return { id, ...data };
+      })));
   }
 
-  updateAppointment(appointment: IAppointment): Observable<IAppointment> {
-    return this.http.put<IAppointment>(environment.appointmentsURL, appointment, environment.httpOptions)
-      .pipe(
-        map(data =>{
-          this.toastService.show('Se ha actualizado la cita correctamente.',{ classname: 'toast-success', delay: 5000})
-          return data;
-        }),
-        catchError(this.handleError<IAppointment>('updateAppointment'))
-      );
+  updateAppointment(appointment: IAppointment) {
+    return this.angularFire.collection("appointments").doc(appointment.id).set(appointment).then(() => {
+      this.toastService.show('Se ha actualizado la cita correctamente.', {classname: 'toast-success', delay: 5000})
+    }, () => catchError(this.handleError<IAppointment>('updateAppointment')));
   }
 
-  updateListAppointments(appointments: IAppointment[]): Observable<IAppointment[]> {
-    return this.http.put<IAppointment[]>(environment.appointmentsURL, appointments, environment.httpOptions)
-      .pipe(
-        map(data =>{
-          this.toastService.show('Se han actualizado las citas correctamente.', { classname: 'toast-success', delay: 5000})
-          return data;
-        }),
-        catchError(this.handleError<IAppointment[]>('updateListAppointments'))
-      );
+  updateListAppointments(appointments: IAppointment[]) {
+    const batch = this.angularFire.firestore.batch();
+    appointments.forEach(appointment => {
+      batch.set(this.angularFire.firestore.collection("appointments").doc(appointment.id), appointment);
+    });
+    return batch.commit().then(() => {
+      this.toastService.show('Se han actualizado las citas correctamente.', {classname: 'toast-success', delay: 5000})
+    }, () => catchError(this.handleError<IAppointment>('updateListAppointment')));
   }
 
-  createAppointment(appointment: IAppointment): Observable<IAppointment> {
-    return this.http.post<IAppointment>(environment.appointmentsURL, appointment, environment.httpOptions)
-      .pipe(
-        map(data =>{
-          this.toastService.show('Se ha creado la cita correctamente.', { classname: 'toast-success', delay: 5000})
-          return data;
-        }),
-        catchError(this.handleError<IAppointment>('addAppointment'))
-      );
+  createAppointment(appointment: IAppointment) {
+    return this.angularFire.collection("appointments").add(appointment).then(() => {
+        this.toastService.show('Se ha creado la cita correctamente.', { classname: 'toast-success', delay: 5000})
+    }, () => catchError(this.handleError<IAppointment>('addAppointment')));
   }
 
-  deleteAppointment(appointment: IAppointment): Observable<IAppointment> {
-    return this.http.delete<IAppointment>(environment.appointmentsURL + '/' + appointment.id, environment.httpOptions)
-      .pipe(
-        map(data =>{
-          this.toastService.show('Se ha borrado la cita correctamente.', { classname: 'toast-success', delay: 5000})
-          return data;
-        }),
-        catchError(this.handleError<IAppointment>('deleteAppointment'))
-      );
+  deleteAppointment(appointment: IAppointment) {
+    return this.angularFire.collection("appointments").doc(appointment.id).delete().then(() => {
+      this.toastService.show('Se ha borrado la cita correctamente.', {classname: 'toast-success', delay: 5000})
+    }, () => catchError(this.handleError<IAppointment>('deleteAppointment')));
   }
 
   private handleError<T>(operation = 'operation', result?: T) {

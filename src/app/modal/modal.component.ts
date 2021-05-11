@@ -5,6 +5,8 @@ import { IAppointment } from "../models/IAppointment";
 import * as _ from "lodash";
 import { environment } from "../../environments/environment";
 import * as moment from 'moment';
+import { IPhysio } from "../models/IPhysio";
+import { Moment } from "moment";
 
 @Component({
   selector: 'app-modal',
@@ -60,6 +62,8 @@ export class ModalComponent implements OnInit {
   createAppointment(appointment: IAppointment): void {
     appointment.startAppointment = this.startAppointment(appointment.startAppointment, this.selectedHour[0]);
     appointment.endAppointment = moment(appointment.startAppointment).add(30, 'minutes').toDate();
+    appointment.treatment.physio = {} as IPhysio;
+    appointment.treatment.physio.dni = '1';
     let result = {
       appointment: appointment,
       action: 'Create'
@@ -123,6 +127,11 @@ export class ModalComponent implements OnInit {
         break;
     }
     return physio;
+  }
+
+  filteringSatAndMonday = (d: Moment | null): boolean => {
+    const day = d?.day();
+    return day !== 0 && day !== 6;
   }
 
 }

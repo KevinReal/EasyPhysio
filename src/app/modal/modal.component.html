@@ -63,6 +63,7 @@
                  id="dateAppointment"
                  placeholder="Elija una fecha"
                  [matDatepicker]="picker"
+                 [matDatepickerFilter]="filteringSatAndMonday"
                  required
                  disabled
                  [(ngModel)]="data.appointments[0].startAppointment">
@@ -72,9 +73,10 @@
       </div>
       <div class="col-6">
         <mat-label class="label-modal" for="startAppointment">Hora de la cita:</mat-label>
-        <mat-form-field>
+        <mat-form-field floatLabel="never" [hideRequiredMarker]="true">
           <select class="form-control"
-                  required matNativeControl
+                  required
+                  matNativeControl
                   name="startAppointment"
                   id="startAppointment"
                   [(ngModel)]="selectedHour[0]">
@@ -119,7 +121,7 @@
         </div>
         <div>
           <mat-label class="label-modal" [attr.for]="'patient' + i">Paciente:</mat-label>
-          <mat-form-field floatLabel="never">
+          <mat-form-field floatLabel="never" [hideRequiredMarker]="true">
             <input [disabled]="!canCreate"
                    required
                    matInput
@@ -127,26 +129,26 @@
                    id="patient{{i}}"
                    class="form-control"
                    placeholder="Nombre del paciente"
-                   name="patient"
+                   name="patient{{i}}"
                    [(ngModel)]="appointment.treatment.patient.name">
           </mat-form-field>
         </div>
         <div>
           <mat-label class="label-modal" [attr.for]="'room' + i">Sala:</mat-label>
-          <mat-form-field floatLabel="never">
+          <mat-form-field floatLabel="never" [hideRequiredMarker]="true">
             <input matInput
                    required
                    type="number"
                    id="room{{i}}"
                    class="form-control"
                    placeholder="Elija sala"
-                   name="room"
+                   name="room{{i}}"
                    [(ngModel)]="appointment.roomNumber">
           </mat-form-field>
         </div>
         <div>
           <mat-label class="label-modal" [attr.for]="'reasonAppointment' + i">Motivo de la cita:</mat-label>
-          <mat-form-field floatLabel="never">
+          <mat-form-field floatLabel="never" [hideRequiredMarker]="true">
               <textarea  matInput
                          cdkTextareaAutosize
                          cdkAutosizeMinRows="3"
@@ -154,7 +156,7 @@
                          id="reasonAppointment{{i}}"
                          class="form-control"
                          placeholder="Motivo de la cita"
-                         name="reasonAppointment"
+                         name="reasonAppointment{{i}}"
                          required
                          [(ngModel)]="appointment.reasonAppointment">
               </textarea>
@@ -162,13 +164,14 @@
         </div>
         <div>
           <mat-label class="label-modal" [attr.for]="'dateAppointment' + i">Fecha de la cita:</mat-label>
-          <mat-form-field>
+          <mat-form-field floatLabel="never" [hideRequiredMarker]="true">
             <input matInput
                    required
                    disabled
                    name="dateAppointment"
                    id="dateAppointment{{i}}"
                    [matDatepicker]="picker"
+                   [matDatepickerFilter]="filteringSatAndMonday"
                    [(ngModel)]="appointment.startAppointment">
             <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
             <mat-datepicker disabled="false" #picker color="accent"></mat-datepicker>
@@ -176,7 +179,7 @@
         </div>
         <div>
           <mat-label class="label-modal" [attr.for]="'startAppointment' + i">Hora de la cita:</mat-label>
-          <mat-form-field>
+          <mat-form-field floatLabel="never" [hideRequiredMarker]="true">
             <select required
                     matNativeControl
                     name="startAppointment"

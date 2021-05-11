@@ -57,7 +57,7 @@
   border-radius: 20px;
 }
 
-.arrow:hover {
+.arrow:hover, .weekdays-style:hover {
   background-color: $tertiary-color;
 }
 
@@ -74,4 +74,12 @@
   overflow: hidden;
   text-overflow: ellipsis;
   width: 10vw;
+}
+
+.weekdays-style {
+  cursor: pointer;
+  font-size: 22px;
+  color: $day-color;
+  padding: 0.8vh;
+  border-radius: 20px;
 }

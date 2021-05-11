@@ -12,6 +12,7 @@
            matInput
            [matDatepicker]="picker"
            [(ngModel)]="calendarDate"
+           [matDatepickerFilter]="filteringSatAndMonday"
            (dateChange)="changeDateSelected($event)">
     <mat-datepicker-toggle id="calendar-icon" matSuffix [for]="picker"></mat-datepicker-toggle>
     <mat-datepicker #picker color="accent"></mat-datepicker>
@@ -48,15 +49,15 @@
 <div class="row weekdays-container">
   <div class="col-1"></div>
   <div class="col" *ngFor="let day of workDays; let i = index">
-    <p class="align-center">{{day}}</p>
-    <p class="align-center">{{weekDays[i]}}</p>
+    <p class="align-center"><strong>{{day}}</strong></p>
+    <p class="align-center"><span class="weekdays-style">{{weekDays[i]}}</span></p>
   </div>
 </div>
 <div class="row grid-container">
   <div class="col-1">
     <div *ngFor="let hour of hoursOfTheDay; let i = index">
       <div class="first-column">
-        <p>{{hour}}</p>
+        <p><strong>{{hour}}</strong></p>
       </div>
     </div>
   </div>
@@ -66,7 +67,7 @@
            class="row"
            [ngClass]="{'disable-non-working-hours' : workingHours | calculateWorkHours: hoursOfTheDay[i]}">
         <div *ngFor="let col of numberColsGrid; let j = index"
-             (click)="openModalCreate(hoursOfTheDay[i],  weekDays[j], hoursOfTheDay[i+1])"
+             (click)="openModalCreate(hoursOfTheDay[i],  weekDays[j])"
              cdkDropList
              cdkDropListOrientation="horizontal"
              [cdkDropListData]="appointments | appointments: hoursOfTheDay[i] : weekDays[j] : recalculatedDate : physiosFilter"

@@ -10,6 +10,7 @@ import { ModalComponent } from "../modal/modal.component";
 import { AppointmentsPipe } from "../pipes/appointments.pipe";
 import { IPhysio } from "../models/IPhysio";
 import { MatCheckboxChange } from "@angular/material/checkbox";
+import { Moment } from "moment";
 
 @Component({
   selector: 'app-scheduler',
@@ -29,56 +30,65 @@ export class SchedulerComponent implements OnInit {
   today;
   recalculatedDate;
   calendarDate;
-  getAppointmentsStartDate;
-  getAppointmentsEndDate;
   monthToDisplay;
   yearToDisplay;
   weekDays: number[] = [];
 
   appointments: IAppointment[] = [];
-  newAppointment: IAppointment = { treatment: { patient: {}}} as IAppointment;
+  newAppointment: IAppointment = {treatment: {patient: {}}} as IAppointment;
 
   flagToUpdateMonth = true;
-  physios: IPhysio[] = [{dni: '12345678K', name: 'Pepito', lastname: 'De los Palotes'}, {dni: '1234', name: 'Juanito', lastname: 'asdadad'}, {dni: '12', name: 'Jaimito', lastname: 'sin apellido'}, {dni: '1', name: 'Jaimito2', lastname: 'sin apellido2'}] as IPhysio[];
+  physios: IPhysio[] = [{dni: '12345678K', name: 'Pepito', lastname: 'De los Palotes'}, {
+    dni: '1234',
+    name: 'Juanito',
+    lastname: 'asdadad'
+  }, {dni: '12', name: 'Jaimito', lastname: 'sin apellido'}, {
+    dni: '1',
+    name: 'Jaimito2',
+    lastname: 'sin apellido2'
+  }] as IPhysio[];
   physiosFilter: string[] = [];
 
-  constructor(private scheduleService: AppointmentService,
+  constructor(private appointmentService: AppointmentService,
               private matDialog: MatDialog,
               private appointmentPipe: AppointmentsPipe) {
     moment.locale('es');
     this.today = moment();
     this.recalculatedDate = moment();
     this.calendarDate = moment();
-    this.getAppointmentsStartDate = moment();
-    this.getAppointmentsEndDate = moment();
     this.monthToDisplay = moment().month();
     this.yearToDisplay = moment().year();
   }
 
   ngOnInit() {
     this.goToToday();
-    this.getAppointmentsByRangeOfDates();
+    this.getAppointments();
   }
 
-  getAppointmentsByRangeOfDates(): void {
-    this.scheduleService.getAppointmentsByRangeOfDates(this.getAppointmentsStartDate, this.getAppointmentsEndDate)
-      .subscribe(weeklySchedule => this.appointments = weeklySchedule);
+  getAppointments(): void {
+    this.appointmentService.getAppointments().subscribe(appointments => {
+      appointments.map(appointment => {
+        appointment.startAppointment = moment.unix(appointment.startAppointment.seconds).toDate();
+        appointment.endAppointment = moment.unix(appointment.endAppointment.seconds).toDate();
+      });
+      this.appointments = appointments;
+    });
   }
 
   updateAppointment(appointment: IAppointment): void {
-    this.scheduleService.updateAppointment(appointment).subscribe(() => this.getAppointmentsByRangeOfDates());
+    this.appointmentService.updateAppointment(appointment).then();
   }
 
   updateListAppointments(appointments: IAppointment[]): void {
-    this.scheduleService.updateListAppointments(appointments).subscribe(() => this.getAppointmentsByRangeOfDates());
+    this.appointmentService.updateListAppointments(appointments).then();
   }
 
   createAppointment(appointment: IAppointment): void {
-    this.scheduleService.createAppointment(appointment).subscribe(()=> this.getAppointmentsByRangeOfDates());
+    this.appointmentService.createAppointment(appointment).then();
   }
 
   deleteAppointment(appointment: IAppointment): void {
-    this.scheduleService.deleteAppointment(appointment).subscribe(() => this.getAppointmentsByRangeOfDates());
+    this.appointmentService.deleteAppointment(appointment).then();
   }
 
   drop(event: CdkDragDrop<IAppointment[]>, workingHour: string, weekDays: number): void {
@@ -128,17 +138,15 @@ export class SchedulerComponent implements OnInit {
       this.yearToDisplay = moment().year();
       this.calendarDate = moment();
       for (let i = 0; i <= 6; i++) {
-        let dayOfWeek = moment().date() - ((moment().days() + 6) % 7) + i ;
+        let dayOfWeek = moment().date() - ((moment().days() + 6) % 7) + i;
         this.weekDays.push(this.fixDaysFromWeek(dayOfWeek));
       }
     }
-    this.getAppointmentsStartDate = moment(this.weekDays[0], "D");
-    this.getAppointmentsEndDate = moment(this.weekDays[4], "D").endOf('day');
   }
 
   fixDaysFromWeek(dayOfWeek: number): number {
     if (dayOfWeek <= 0) {
-      if (this.flagToUpdateMonth){
+      if (this.flagToUpdateMonth) {
         this.flagToUpdateMonth = !this.flagToUpdateMonth;
         if (this.monthToDisplay === 0) {
           this.monthToDisplay = 11;
@@ -204,11 +212,18 @@ export class SchedulerComponent implements OnInit {
     });
   }
 
-  openModalCreate(appointmentStartDate: string, weekDays: number, appointmentEndDate: string): void {
-    if (_.findIndex(this.workingHours, function(hour) { return hour == appointmentStartDate; }) !== -1) {
-      this.newAppointment = { treatment: { patient: {}}} as IAppointment;
-      this.newAppointment.startAppointment = moment(weekDays + ' ' + appointmentStartDate, 'DD hh:mm').toDate();
-      this.newAppointment.endAppointment = moment(weekDays + ' ' + appointmentEndDate, 'DD hh:mm').toDate();
+  openModalCreate(appointmentStartDate: string, weekDays: number): void {
+    if (_.findIndex(this.workingHours, function (hour) {
+      return hour == appointmentStartDate;
+    }) !== -1) {
+      this.newAppointment = {treatment: {patient: {}}} as IAppointment;
+      this.newAppointment.startAppointment = moment(this.recalculatedDate.year() + ' '
+        + (this.recalculatedDate.month() + 1) + ' '
+        + weekDays + ' '
+        + appointmentStartDate,
+        'yyyy MM DD hh:mm').toDate();
+      this.newAppointment.endAppointment = moment(this.newAppointment.startAppointment).add(30, 'minutes').toDate();
+
       let appointments = [];
       appointments.push(this.newAppointment);
 
@@ -236,15 +251,15 @@ export class SchedulerComponent implements OnInit {
       {
         data: {
           title: 'Citas agendadas ' +
-                  dayAndHourAppointments.date() + '/' +
-                  (dayAndHourAppointments.month() + 1) + '/' +
-                  dayAndHourAppointments.year() + ' ' +
-                  workingHours + ' :',
+            dayAndHourAppointments.date() + '/' +
+            (dayAndHourAppointments.month() + 1) + '/' +
+            dayAndHourAppointments.year() + ' ' +
+            workingHours + ' :',
           appointments: JSON.parse(JSON.stringify(this.appointmentPipe.transform(appointments,
-                                                                                 workingHours,
-                                                                                 weekDays,
-                                                                                 this.recalculatedDate,
-                                                                                 this.physiosFilter))),
+            workingHours,
+            weekDays,
+            this.recalculatedDate,
+            this.physiosFilter))),
           actions: ['Edit', 'Delete']
         },
         panelClass: 'custom-modalbox'
@@ -262,9 +277,9 @@ export class SchedulerComponent implements OnInit {
   changeFilterPhysios(physio: IPhysio, event: MatCheckboxChange): void {
     if (!event.checked) {
       this.physiosFilter.push(physio.dni);
-      this.getAppointmentsByRangeOfDates();
+      this.getAppointments();
     } else {
-      this.physiosFilter = _.remove(this.physiosFilter, function(e) {
+      this.physiosFilter = _.remove(this.physiosFilter, function (e) {
         return e !== physio.dni
       });
     }
@@ -294,4 +309,8 @@ export class SchedulerComponent implements OnInit {
     return physio;
   }
 
+  filteringSatAndMonday = (d: Moment | null): boolean => {
+    const day = d?.day();
+    return day !== 0 && day !== 6;
+  }
 }

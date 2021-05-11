@@ -8,8 +8,6 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { DragDropModule } from "@angular/cdk/drag-drop";
 import { HttpClientModule } from '@angular/common/http';
-import { HttpClientInMemoryWebApiModule } from 'angular-in-memory-web-api';
-import { InMemoryDataService } from './services/in-memory-data.service';
 import { FormsModule } from '@angular/forms';
 import { AppointmentsPipe } from './pipes/appointments.pipe';
 import { MatDatepickerModule } from '@angular/material/datepicker';
@@ -21,6 +19,9 @@ import { ModalComponent } from './modal/modal.component';
 import { MAT_DIALOG_DEFAULT_OPTIONS } from "@angular/material/dialog";
 import { MatCheckboxModule } from "@angular/material/checkbox";
 import { ToastContainerComponent } from './toast-container/toast-container.component';
+import { AngularFirestoreModule } from "@angular/fire/firestore";
+import { AngularFireModule } from "@angular/fire";
+import { environment } from "../environments/environment";
 
 @NgModule({
   declarations: [
@@ -38,14 +39,13 @@ import { ToastContainerComponent } from './toast-container/toast-container.compo
     BrowserAnimationsModule,
     DragDropModule,
     HttpClientModule,
-    HttpClientInMemoryWebApiModule.forRoot(
-      InMemoryDataService, {dataEncapsulation: false}
-    ),
     FormsModule,
     MatDatepickerModule,
     MatInputModule,
     MatMomentDateModule,
-    MatCheckboxModule
+    MatCheckboxModule,
+    AngularFirestoreModule,
+    AngularFireModule.initializeApp(environment.firebaseConfig)
   ],
   providers: [AppointmentsPipe,
               {provide: MAT_DATE_LOCALE, useValue: 'es_ES'},
