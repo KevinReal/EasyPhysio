@@ -6,8 +6,7 @@ import { ToastService } from '../services/toast.service';
   selector: 'app-toast-container',
   templateUrl: './toast-container.component.html',
   styleUrls: ['./toast-container.component.scss'],
-  // eslint-disable-next-line @angular-eslint/no-host-metadata-property
-  host: {'[class.ngb-toasts]': 'true'}
+  "host": {'[class.ngb-toasts]': 'true'}
 })
 
 export class ToastContainerComponent {
@@ -16,9 +15,9 @@ export class ToastContainerComponent {
 
   constructor(public toastService: ToastService) {}
 
-  isTemplate(toast: any) { return toast.textOrTpl instanceof TemplateRef; }
+  isTemplate(toast: any): boolean { return toast.textOrTpl instanceof TemplateRef; }
 
-  close(toast: any) {
+  close(toast: any): void {
     toast.delay = 0;
     this.hide = true;
   }
