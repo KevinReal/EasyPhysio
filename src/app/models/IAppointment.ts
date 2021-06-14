@@ -1,5 +1,6 @@
 import { ITreatment } from "./ITreatment";
 import { IPass } from "./IPass";
+import { IRoom } from "./IRoom";
 
 export interface IAppointment {
   id: string;
@@ -7,6 +8,6 @@ export interface IAppointment {
   endAppointment: any;
   reasonAppointment: string;
   treatment: ITreatment;
-  roomNumber: number;
+  room: IRoom;
   pass?: IPass;
 }
