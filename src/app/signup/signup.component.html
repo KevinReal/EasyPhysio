@@ -1,0 +1,80 @@
+<div class="signup-page">
+  <div class="signup-container">
+    <h1><strong>Registrarse</strong></h1>
+    <form #signupForm="ngForm"
+          (ngSubmit)="signupForm.form.valid && onSignUp()"
+          [appMatchPassword]="['passwordSignUp', 'repeatPasswordSignUp']">
+      <div class="container-error" *ngIf="accountAlreadyUsed">
+        <p class="show-error">El correo electrónico ya está en uso.<br>
+          <span class="link" routerLink="/login">Inicia sesión</span>
+        </p>
+      </div>
+      <div>
+        <mat-form-field floatLabel="never" [hideRequiredMarker]="true">
+          <input matInput
+                 type="text"
+                 class="form-control"
+                 name="userName"
+                 id="userName"
+                 placeholder="Nombre completo"
+                 required
+                 [(ngModel)]="fullNameSignUp">
+        </mat-form-field>
+      </div>
+      <div>
+        <mat-form-field floatLabel="never" [hideRequiredMarker]="true">
+          <input matInput
+                 type="email"
+                 class="form-control"
+                 name="emailSignUp"
+                 id="emailSignUp"
+                 placeholder="Correo electrónico"
+                 required
+                 #emailPattern="ngModel"
+                 appEmailPattern
+                 [(ngModel)]="emailSignUp">
+          <mat-error *ngIf="emailPattern.touched && emailPattern.errors?.invalidEmail">
+            El formato del correo electrónico no es válido.
+          </mat-error>
+        </mat-form-field>
+      </div>
+      <div [ngClass]="{ 'resize-after-error' : passwordPattern.touched && passwordPattern.errors?.invalidPassword }">
+        <mat-form-field floatLabel="never" [hideRequiredMarker]="true">
+          <input matInput
+                 type="password"
+                 class="form-control"
+                 name="passwordSignUp"
+                 id="passwordSignUp"
+                 placeholder="Contraseña"
+                 required
+                 #passwordPattern="ngModel"
+                 appPasswordPattern
+                 [(ngModel)]="passwordSignUp">
+          <mat-error *ngIf="passwordPattern.touched && passwordPattern.errors?.invalidPassword">
+            La contraseña debe tener mínimo 8 caracteres con al menos 1 letra minúscula, 1 letra mayúscula y 1 dígito.
+          </mat-error>
+        </mat-form-field>
+      </div>
+      <div>
+        <mat-form-field floatLabel="never" [hideRequiredMarker]="true">
+          <input matInput
+                 type="password"
+                 class="form-control"
+                 name="repeatPasswordSignUp"
+                 id="repeatPasswordSignUp"
+                 placeholder="Confirma contraseña"
+                 required
+                 #repeatPassword="ngModel"
+                 [(ngModel)]="repeatPasswordSignUp">
+          <mat-error *ngIf="repeatPassword.touched && signupForm.errors?.passwordMismatch">
+            Las contraseñas no coinciden.
+          </mat-error>
+        </mat-form-field>
+      </div>
+      <div class="login-footer">
+        <button type="submit" class="button secondary-btn signup-button">Registrarse</button>
+        <p>¿Tienes cuenta? <span class="link" routerLink="/login">Inicia sesión</span></p>
+      </div>
+    </form>
+  </div>
+</div>

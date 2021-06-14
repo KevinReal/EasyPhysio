@@ -1,0 +1,100 @@
+<div class="login-page">
+  <div class="login-container">
+    <h1><strong>Iniciar sesión</strong></h1>
+    <form #loginForm="ngForm" (ngSubmit)="loginForm.form.valid && onSignIn()">
+      <div class="container-error" *ngIf="noUserCreated">
+        <p class="show-error">No se ha encontrado ninguna cuenta con esta dirección de correo.
+          <br>Vuelve a intentarlo o <span class="link" routerLink="/signup">crea una nueva cuenta.</span></p>
+      </div>
+      <div class="container-error" *ngIf="wrongPassword">
+        <p class="show-error">
+          La cuenta o la contraseña es incorrecta. <br>Si no recuerdas la cuenta
+          <span class="link">restablécela ahora.</span></p>
+      </div>
+      <div class="container-error" *ngIf="userNotPhysio">
+        <p class="show-error">
+          Esta cuenta no es de un fisioterapeuta, por favor desmarque la casilla <br>
+          <span (click)="changeIsPhysio()" class="link">"Soy fisioterapeuta"</span></p>
+      </div>
+      <div class="container-error" *ngIf="wrongDNI">
+        <p class="show-error">
+          El NIF/NIE proporcionado es incorrecto.
+      </div>
+      <div>
+        <mat-form-field floatLabel="never" [hideRequiredMarker]="true">
+          <input matInput
+                 type="email"
+                 class="form-control"
+                 name="emailSignIn"
+                 id="emailSignIn"
+                 placeholder="Correo electrónico"
+                 required
+                 #emailPattern="ngModel"
+                 appEmailPattern
+                 [(ngModel)]="emailSignIn">
+          <mat-error class="input-error" *ngIf="emailPattern.touched && emailPattern.errors?.invalidEmail">
+            El formato del correo electrónico no es válido.
+          </mat-error>
+        </mat-form-field>
+      </div>
+      <div *ngIf="isPhysio">
+        <mat-form-field floatLabel="never" [hideRequiredMarker]="true">
+          <input matInput
+                 type="text"
+                 class="form-control"
+                 name="dniSignIn"
+                 id="dniSignIn"
+                 placeholder="NIF/NIE"
+                 required
+                 #dniPattern="ngModel"
+                 appDnipattern
+                 [(ngModel)]="dniSignIn">
+          <mat-error *ngIf="dniPattern.touched && dniPattern.errors?.invalidDNI">
+            El formato del NIF/NIE no es válido.
+          </mat-error>
+        </mat-form-field>
+      </div>
+      <div [ngClass]="{ 'resize-after-error' : passwordPattern.touched && passwordPattern.errors?.invalidPassword }">
+        <mat-form-field floatLabel="never" [hideRequiredMarker]="true">
+          <input matInput
+                 type="password"
+                 class="form-control"
+                 name="passwordSignIn"
+                 id="passwordSignIn"
+                 placeholder="Contraseña"
+                 required
+                 #passwordPattern="ngModel"
+                 appPasswordPattern
+                 [(ngModel)]="passwordSignIn">
+          <mat-error *ngIf="passwordPattern.touched && passwordPattern.errors?.invalidPassword">
+            La contraseña debe tener mínimo 8 caracteres con al menos 1 letra minúscula, 1 letra mayúscula y 1 dígito.
+          </mat-error>
+        </mat-form-field>
+      </div>
+      <div>
+        <mat-checkbox color="accent"
+                      id="rememberMe"
+                      name="rememberMe"
+                      [checked]="rememberMe"
+                      (change)="changeRememberMe()">
+          Recuérdame
+        </mat-checkbox>
+      </div>
+      <div>
+        <mat-checkbox color="accent"
+                      id="isPhysio"
+                      name="isPhysio"
+                      [checked]="isPhysio"
+                      (change)="changeIsPhysio()">
+          Soy fisioterapeuta
+        </mat-checkbox>
+      </div>
+      <div class="login-footer">
+        <button id="submitSignUp" type="submit" class="button secondary-btn login-button">Iniciar sesión</button>
+        <p>¿No tienes cuenta? <span class="link" routerLink="/signup">Créate una</span></p>
+      </div>
+    </form>
+  </div>
+</div>
+
+
