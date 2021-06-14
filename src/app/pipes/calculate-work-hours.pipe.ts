@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import * as _ from "lodash";
+import { indexOf } from "lodash";
 
 @Pipe({
   name: 'calculateWorkHours'
@@ -8,7 +8,7 @@ import * as _ from "lodash";
 export class CalculateWorkHoursPipe implements PipeTransform {
 
   transform(hoursOfTheDay: string[], workingHours: string): boolean {
-    return _.indexOf(hoursOfTheDay, workingHours) === -1;
+    return indexOf(hoursOfTheDay, workingHours) === -1;
   }
 
 }
