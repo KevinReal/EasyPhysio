@@ -108,6 +108,25 @@ input[type=number] {
   cursor: pointer;
 }
 
+.patient-bg1 {
+  color: white;
+  background-image: linear-gradient(to right, black 50% , $physio1-color 50%)
+}
+
+.patient-bg2 {
+  color: white;
+  background-image: linear-gradient(to right, black 50% , $physio2-color 50%)
+}
+
+.patient-bg3 {
+  color: white;
+  background-image: linear-gradient(to right, black 50%, $physio3-color 50%)
+}
+.patient-bg4 {
+  color: white;
+  background-image: linear-gradient(to right, black 50%, $physio4-color 50%)
+}
+
 .physio-bg1 {
   color: white;
   background-color: $physio1-color;
@@ -142,4 +161,72 @@ input[type=number] {
 
 .physio4 {
   color: $physio4-color;
+}
+
+.login-page, .signup-page {
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  width: 100%;
+  height: 100%;
+  background-color: $primary-color;
+}
+
+.login-container, .signup-container {
+  position:relative;
+  text-align:center;
+  padding: 3vh 0 0 0;
+  width: 30%;
+  height: 80%;
+  background-color: white;
+}
+
+.login-footer, .signup-footer{
+  padding-bottom: 2vh;
+  width: 100%;
+  text-align: center;
+  position: absolute;
+  bottom: 0;
+}
+
+.link {
+  color: black;
+  cursor: pointer;
+}
+
+.link:hover {
+  text-decoration: underline;
+}
+
+.show-error {
+  color: black;
+  width: 20vw;
+  padding: 1vh 1vw;
+  background-color: $warn-color;
+}
+
+.container-error {
+  display: flex;
+  justify-content: center;
+}
+
+.login-button, .signup-button {
+  font-weight: bold;
+  font-size: 16px;
+  width: 12vw;
+  padding: 15px 0;
+  margin-bottom: 2vh;
+}
+
+.mat-error {
+  color: $physio3-color;
+  font-size: 12px;
+}
+
+.resize-after-error {
+  height: 15vh;
+}
+
+.mat-option[aria-disabled=true] {
+  cursor: not-allowed !important;
 }

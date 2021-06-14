@@ -1,16 +1,30 @@
 import { Component, OnInit } from '@angular/core';
-import { CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
+import { CdkDragDrop, transferArrayItem } from '@angular/cdk/drag-drop';
 import { IAppointment } from "../models/IAppointment";
 import { AppointmentService } from "../services/appointment.service";
 import { environment } from "../../environments/environment";
 import * as moment from 'moment';
-import * as _ from "lodash";
+import { indexOf, findIndex, remove, filter, includes } from "lodash";
 import { MatDialog } from "@angular/material/dialog";
 import { ModalComponent } from "../modal/modal.component";
 import { AppointmentsPipe } from "../pipes/appointments.pipe";
 import { IPhysio } from "../models/IPhysio";
 import { MatCheckboxChange } from "@angular/material/checkbox";
 import { Moment } from "moment";
+import { FirebaseAuthService } from "../services/firebase-auth.service";
+import { faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
+import { faUserCircle } from '@fortawesome/free-solid-svg-icons';
+import { faCog } from '@fortawesome/free-solid-svg-icons';
+import { faHistory } from '@fortawesome/free-solid-svg-icons';
+import { faChartPie } from '@fortawesome/free-solid-svg-icons';
+import { faShoppingCart } from '@fortawesome/free-solid-svg-icons';
+import { faInfoCircle } from '@fortawesome/free-solid-svg-icons';
+import { ToastService } from "../services/toast.service";
+import { IRoom } from "../models/IRoom";
+import { PhysioService } from "../services/physio.service";
+import { flatMap } from "rxjs/internal/operators";
+import {ITreatment} from "../models/ITreatment";
+import {IPatient} from "../models/IPatient";
 
 @Component({
   selector: 'app-scheduler',
@@ -33,25 +47,41 @@ export class SchedulerComponent implements OnInit {
   monthToDisplay;
   yearToDisplay;
   weekDays: number[] = [];
+  flagToUpdateMonth = true;
 
   appointments: IAppointment[] = [];
-  newAppointment: IAppointment = {treatment: {patient: {}}} as IAppointment;
+  newAppointment: IAppointment = {
+    room: {} as IRoom,
+    treatment: {
+      patient: {} as IPatient,
+      physio: {} as IPhysio
+    } as ITreatment
+  } as IAppointment;
 
-  flagToUpdateMonth = true;
-  physios: IPhysio[] = [{dni: '12345678K', name: 'Pepito', lastname: 'De los Palotes'}, {
-    dni: '1234',
-    name: 'Juanito',
-    lastname: 'asdadad'
-  }, {dni: '12', name: 'Jaimito', lastname: 'sin apellido'}, {
-    dni: '1',
-    name: 'Jaimito2',
-    lastname: 'sin apellido2'
-  }] as IPhysio[];
   physiosFilter: string[] = [];
+  physios: IPhysio[] = [];
+  physioDni: string | undefined;
+  loggedPatientFilter = false;
+  loggedPatientUid: string | undefined;
+  // @ts-ignore
+  otherUsersPermissions: flatMap<string, string[]>
+
+  rooms: IRoom[] = [];
+
+  faSignOutAlt = faSignOutAlt;
+  faUserCircle = faUserCircle;
+  faHistory = faHistory;
+  faCog = faCog;
+  faChartPie = faChartPie;
+  faShoppingCart = faShoppingCart;
+  faInfoCircle = faInfoCircle;
 
   constructor(private appointmentService: AppointmentService,
               private matDialog: MatDialog,
-              private appointmentPipe: AppointmentsPipe) {
+              private appointmentPipe: AppointmentsPipe,
+              public firebaseAuth: FirebaseAuthService,
+              private toastService: ToastService,
+              private physioService: PhysioService) {
     moment.locale('es');
     this.today = moment();
     this.recalculatedDate = moment();
@@ -61,6 +91,7 @@ export class SchedulerComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.getPhysios();
     this.goToToday();
     this.getAppointments();
   }
@@ -91,19 +122,35 @@ export class SchedulerComponent implements OnInit {
     this.appointmentService.deleteAppointment(appointment).then();
   }
 
-  drop(event: CdkDragDrop<IAppointment[]>, workingHour: string, weekDays: number): void {
-    if (_.indexOf(this.workingHours, workingHour) !== -1) {
-      if (event.previousContainer === event.container) {
-        moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
+  dropAppointment(event: CdkDragDrop<IAppointment[]>, workingHour: string, weekDays: number): void {
+    const dateSlotDropped = moment(this.recalculatedDate.year() + ' '
+                                  + (this.recalculatedDate.month() + 1) + ' '
+                                  + weekDays + ' '
+                                  + workingHour,
+                                  'yyyy MM DD hh:mm');
+    if (moment() < dateSlotDropped) {
+      if (indexOf(this.workingHours, workingHour) !== -1) {
+        if (event.previousContainer !== event.container &&
+          this.checkWorkingAndHourDayAndCheckMaxAppointmentsPerSlot(workingHour,
+            weekDays,
+            event.previousContainer.data[event.previousIndex])) {
+          transferArrayItem(event.previousContainer.data,
+            event.container.data,
+            event.previousIndex,
+            event.currentIndex);
+          event.container.data[event.currentIndex].startAppointment = moment(this.recalculatedDate.year() + ' '
+            + (this.recalculatedDate.month() + 1) + ' '
+            + weekDays + ' '
+            + workingHour,
+            'yyyy MM DD hh:mm').toDate();
+          event.container.data[event.currentIndex].endAppointment = moment(event.container.data[event.currentIndex].startAppointment).add(30, 'minutes').toDate();
+          this.updateAppointment(event.container.data[event.currentIndex]);
+        }
       } else {
-        transferArrayItem(event.previousContainer.data,
-          event.container.data,
-          event.previousIndex,
-          event.currentIndex);
-        event.container.data[0].startAppointment = moment(weekDays + ' ' + workingHour, 'DD hh:mm').toDate();
-        event.container.data[0].endAppointment = moment(event.container.data[0].startAppointment).add(30, 'minutes').toDate();
-        this.updateAppointment(event.container.data[0]);
+        this.toastService.show('Horario fuera de las horas de trabajo del centro.', {classname: 'toast-warn', delay: 10000})
       }
+    } else {
+      this.toastService.show('No puede reservar cita para días anteriores a hoy.', {classname: 'toast-warn', delay: 10000})
     }
   }
 
@@ -196,6 +243,7 @@ export class SchedulerComponent implements OnInit {
     const modalDialog = this.matDialog.open(ModalComponent,
       {
         data: {
+          allAppointments: this.appointments,
           title: 'Detalles de la cita:',
           appointments: appointments,
           actions: ['Edit', 'Delete']
@@ -213,10 +261,9 @@ export class SchedulerComponent implements OnInit {
   }
 
   openModalCreate(appointmentStartDate: string, weekDays: number): void {
-    if (_.findIndex(this.workingHours, function (hour) {
+    if (findIndex(this.workingHours, function (hour) {
       return hour == appointmentStartDate;
     }) !== -1) {
-      this.newAppointment = {treatment: {patient: {}}} as IAppointment;
       this.newAppointment.startAppointment = moment(this.recalculatedDate.year() + ' '
         + (this.recalculatedDate.month() + 1) + ' '
         + weekDays + ' '
@@ -225,11 +272,12 @@ export class SchedulerComponent implements OnInit {
       this.newAppointment.endAppointment = moment(this.newAppointment.startAppointment).add(30, 'minutes').toDate();
 
       let appointments = [];
-      appointments.push(this.newAppointment);
+      appointments.push(JSON.parse(JSON.stringify(this.newAppointment)));
 
       const modalDialog = this.matDialog.open(ModalComponent,
         {
           data: {
+            allAppointments: this.appointments,
             title: 'Crear una nueva cita:',
             appointments: appointments,
             actions: ['Create']
@@ -246,7 +294,14 @@ export class SchedulerComponent implements OnInit {
   }
 
   openModalGroupedAppointments(appointments: IAppointment[], workingHours: string, weekDays: number): void {
-    let dayAndHourAppointments = moment(appointments[0].startAppointment);
+    const appointmentsAux = JSON.parse(JSON.stringify(this.appointmentPipe.transform(appointments,
+      workingHours,
+      weekDays,
+      this.recalculatedDate,
+      this.physiosFilter,
+      this.loggedPatientFilter,
+      this.loggedPatientUid)));
+    let dayAndHourAppointments = moment(appointmentsAux[0].startAppointment);
     const modalDialog = this.matDialog.open(ModalComponent,
       {
         data: {
@@ -255,11 +310,8 @@ export class SchedulerComponent implements OnInit {
             (dayAndHourAppointments.month() + 1) + '/' +
             dayAndHourAppointments.year() + ' ' +
             workingHours + ' :',
-          appointments: JSON.parse(JSON.stringify(this.appointmentPipe.transform(appointments,
-            workingHours,
-            weekDays,
-            this.recalculatedDate,
-            this.physiosFilter))),
+          appointments: appointmentsAux,
+          allAppointments: this.appointments,
           actions: ['Edit', 'Delete']
         },
         panelClass: 'custom-modalbox'
@@ -279,38 +331,107 @@ export class SchedulerComponent implements OnInit {
       this.physiosFilter.push(physio.dni);
       this.getAppointments();
     } else {
-      this.physiosFilter = _.remove(this.physiosFilter, function (e) {
+      this.physiosFilter = remove(this.physiosFilter, function (e) {
         return e !== physio.dni
       });
     }
   }
 
-  addPhysioColor(dni: string, bg: boolean): string {
-    let physio = 'physio';
-    if (bg) {
-      physio += '-bg';
+  addPhysioColor(patientUid: string | undefined, dni: string, bg: boolean): string {
+    let aux = '';
+
+    if (this.loggedPatientFilter && patientUid === this.loggedPatientUid) {
+      aux += 'patient';
+    } else {
+      aux += 'physio';
     }
+
+    if (bg) {
+      aux += '-bg';
+    }
+
     switch (dni) {
-      case '1':
-        physio += '1';
+      case '12345678L':
+        aux += '1';
         break;
-      case '12':
-        physio += '2';
+      case '12345678Q':
+        aux += '2';
         break;
-      case '1234':
-        physio += '3';
+      case '12345678P':
+        aux += '3';
         break;
       case '12345678K':
-        physio += '4';
+        aux += '4';
         break;
       default:
         break;
     }
-    return physio;
+    return aux;
   }
 
   filteringSatAndMonday = (d: Moment | null): boolean => {
     const day = d?.day();
     return day !== 0 && day !== 6;
   }
+
+  logout(): void {
+    this.firebaseAuth.logout();
+  }
+
+  isPhysioOrPatient(): void {
+    this.physioDni = this.firebaseAuth.getPhysioDNI();
+    this.otherUsersPermissions = this.firebaseAuth.getOtherPhysiosPermissions();
+    if (!this.physioDni) {
+      this.otherUsersPermissions = this.firebaseAuth.getOtherPatientsPermissions();
+      this.loggedPatientUid = this.firebaseAuth.getPatientUid();
+      this.loggedPatientFilter = true;
+      this.physios.forEach(physio => this.physiosFilter.push(physio.dni));
+    }
+  }
+
+  getPhysios(): void {
+    this.physioService.getPhysios().subscribe(physios => {
+      this.physios = physios;
+      this.isPhysioOrPatient();
+    })
+  }
+
+  checkWorkingAndHourDayAndCheckMaxAppointmentsPerSlot(workingHour: string, weekDays: number, appointment: IAppointment): boolean {
+    const dateSlotDropped = moment(this.recalculatedDate.year() + ' '
+                                  + (this.recalculatedDate.month() + 1) + ' '
+                                  + weekDays + ' '
+                                  + workingHour,
+                                  'yyyy MM DD hh:mm');
+    if (!includes(appointment.treatment.physio.workingDays, dateSlotDropped.day())) {
+      this.toastService.show('El fisioterapeuta no trabaja ese día.', {classname: 'toast-warn', delay: 10000})
+      return false;
+    }
+    if (!includes(appointment.treatment.physio.workingHours, workingHour)) {
+      this.toastService.show('El fisioterapeuta no trabaja esa franja horaria.', {classname: 'toast-warn', delay: 10000})
+      return false;
+    }
+    const checkMaxAppointemntsPerSlot = filter(this.appointments, function (element: IAppointment) {
+      if (appointment.id === element.id) return;
+      if (element.treatment.physio.dni === appointment.treatment.physio.dni) {
+        const startAppointment = moment(appointment.startAppointment);
+        let modifiedDateAppointment = moment(startAppointment.year() + ' '
+          + (startAppointment.month() + 1) + ' '
+          + weekDays + ' '
+          + workingHour,
+          'yyyy MM DD hh:mm');
+        if (modifiedDateAppointment > element.startAppointment) {
+        } else if (modifiedDateAppointment < element.startAppointment) {
+        } else {
+          return element;
+        }
+      }
+      return;
+    }).length > 1;
+    if (checkMaxAppointemntsPerSlot) {
+      this.toastService.show('Todas las citas del fisioterapeuta están cogidas para esa hora.', {classname: 'toast-warn', delay: 10000})
+      return false;
+    }
+    return true;
+  }
+
 }

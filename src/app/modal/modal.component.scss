@@ -1,7 +1,20 @@
 @import "src/app/variables";
 
+input:disabled::-webkit-input-placeholder { /* WebKit browsers */
+  color:    red;
+}
+input:disabled:-moz-placeholder { /* Mozilla Firefox 4 to 18 */
+  color:    red;
+}
+input:disabled::-moz-placeholder { /* Mozilla Firefox 19+ */
+  color:    red;
+}
+input:disabled:-ms-input-placeholder { /* Internet Explorer 10+ */
+  color:    red;
+}
+
 mat-form-field {
-  width: 50%;
+  width: 70%;
   float: left;
   clear: both;
 }
@@ -11,7 +24,36 @@ mat-form-field {
   height: 58vh;
 }
 
+#errorPatients {
+  color: $physio3-color
+}
+
+#date-appointment-container, #date-appointment-container-list {
+  .mat-form-field-underline {
+    background-color: black;
+  }
+  .dateAppointment::placeholder {
+    color: $physio3-color;
+  }
+}
+
+.calendar-icon-modal {
+  position: relative;
+  top: 5px;
+}
+
+.calendar-icon-modal:hover, .calendar-icon-modal-list:hover {
+  color: $tertiary-color;
+}
+
+.calendar-icon-modal-list {
+  position: relative;
+  bottom: 5px;
+  color: white;
+}
+
 .container-close-modal {
+  min-height: 5vh;
   display: flex;
   justify-content: flex-end;
 }
@@ -30,7 +72,8 @@ mat-form-field {
 }
 
 .icon-delete-appointment:hover {
-  background-color: $warn-color-hover;
+  color: $physio3-color;
+  background-color: white;
 }
 
 .header-modal {
@@ -67,4 +110,44 @@ mat-form-field {
   border: 1px solid black;
   margin: 3vh 0 3vh 4vw;
   border-radius: 10px;
+}
+
+.no-border {
+  border: 0;
+}
+
+.bottom-lift {
+  bottom:15px;
+}
+
+.custom-form-field-container .custom-form-field {
+  background-color: white;
+  padding: 10px 0 10px 10px;
+}
+
+.custom-form-field-container .custom-disabled {
+  cursor: not-allowed;
+}
+
+.mat-select-disabled .mat-select-value {
+  color: black;
+  cursor: not-allowed;
+}
+
+.custom-form-field-container .dateAppointmentClickable {
+  cursor: pointer;
+}
+
+.calendar-icon-modal-list  {
+  .mat-icon-button.mat-button-disabled.mat-button-disabled {
+    color: white;
+    cursor: not-allowed;
+  }
+}
+
+.calendar-icon-modal  {
+  .mat-icon-button.mat-button-disabled.mat-button-disabled {
+    color: rgba(0, 0, 0, 0.54);
+    cursor: not-allowed;
+  }
 }

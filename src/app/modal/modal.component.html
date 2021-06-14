@@ -5,92 +5,294 @@
   <div class="header-modal">
     {{data.title}}
   </div>
-  <form #appointmentForm="ngForm" (ngSubmit)="appointmentForm.form.valid && onSubmitAppointment(data.appointments[0])">
-    <div class="row row-modal">
+  <form #appointmentForm="ngForm"
+        (ngSubmit)="appointmentForm.form.valid && onSubmitAppointment(data.appointments[0])"
+        [appRequiredDateAppointment]="'dateAppointment'">
+    <div class="row row-modal" *ngIf="canCreate || firebaseAuth.getPhysioDNI() ||
+                                      !(otherPatientsPermissions | checkOtherPatientsPermissions :
+                                                                   firebaseAuth.getEmail() :
+                                                                   patientAux.email :
+                                                                   'Create')">
       <div class="col-6">
-        <mat-label class="label-modal" for="patient">Paciente:</mat-label>
-        <mat-form-field floatLabel="never" [hideRequiredMarker]="true">
-          <input [disabled]="!canCreate"
-                 matInput
-                 type="text"
-                 id="patient"
-                 class="form-control"
-                 placeholder="Nombre del paciente"
-                 name="patientName"
-                 required
-                 [(ngModel)]="data.appointments[0].treatment.patient.name">
-        </mat-form-field>
+          <mat-label class="label-modal" for="patient">Paciente:</mat-label>
+          <mat-form-field *ngIf="firebaseAuth.getPhysioDNI()"
+                          class="custom-form-field-container"
+                          appearance="legacy"
+                          floatLabel="never"
+                          [hideRequiredMarker]="true">
+            <input [disabled]="!canCreate || !firebaseAuth.getPhysioDNI()"
+                   matInput
+                   type="text"
+                   id="patientPhysio"
+                   [ngClass]="{ 'custom-disabled' : !canCreate || !firebaseAuth.getPhysioDNI() }"
+                   placeholder="Seleccione un paciente"
+                   name="patientPhysio"
+                   required
+                   appSelectPatientFromList
+                   #patientPhysio="ngModel"
+                   [matAutocomplete]="auto"
+                   [(ngModel)]="patientAux"
+                   (blur)="focusOut()"
+                   (focus)="focusIn()"
+                   (ngModelChange)="filterPatients()">
+            <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn">
+              <mat-option placement="{{i === 0 ? 'bottom' : 'top'}}"
+                          ngbTooltip="{{patient.email}}"
+                          [disabled]="filterPatientWithAppointment(patient.uid,
+                                                                   data.appointments[0].startAppointment,
+                                                                   selectedHour[0])"
+                          *ngFor="let patient of patients | async; let i = index"
+                          [value]="patient">
+                <span>{{patient.fullName}}</span>
+              </mat-option>
+            </mat-autocomplete>
+            <span id="errorPatients" *ngIf="showPatientsError && patientAux && patientPhysio.dirty && patientPhysio.errors?.invalidPatient">
+              Seleccione un paciente.
+            </span>
+          </mat-form-field>
+          <mat-form-field class="custom-form-field-container"
+                          appearance="legacy"
+                          floatLabel="never"
+                          [hideRequiredMarker]="true"
+                          *ngIf="!firebaseAuth.getPhysioDNI()">
+            <mat-select required
+                        name="patient"
+                        id="patient"
+                        placeholder="Seleccione un paciente"
+                        [disabled]="!canCreate ||
+                                    filterPatientWithAppointment(data.appointments[0].treatment.patient.uid,
+                                                                 data.appointments[0].startAppointment,
+                                                                 selectedHour[0])"
+                        [(ngModel)]="data.appointments[0].treatment.patient.uid">
+              <mat-option placement="{{i === 0 ? 'bottom' : 'top'}}"
+                          ngbTooltip="{{patient.email}}"
+                          [disabled]="filterPatientWithAppointment(patient.uid,
+                                                                  data.appointments[0].startAppointment,
+                                                                  selectedHour[0]) ||
+                                      (otherPatientsPermissions | checkOtherPatientsPermissions :
+                                                                  firebaseAuth.getEmail() :
+                                                                  patient.email :
+                                                                  'Create')"
+                          *ngFor="let patient of patientsFilterByOtherPatientsPermissions; let i = index"
+                          [value]="patient.uid">
+                {{patient.fullName}}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
       </div>
       <div class="col-6">
-        <mat-label class="label-modal" for="room">Sala:</mat-label>
-        <mat-form-field floatLabel="never" [hideRequiredMarker]="true">
-          <input matInput
-                 type="number"
-                 id="room"
-                 class="form-control"
-                 placeholder="Elija sala"
-                 name="room"
-                 required
-                 [(ngModel)]="data.appointments[0].roomNumber">
-        </mat-form-field>
-      </div>
-    </div>
-    <div class="row row-modal">
-      <div class="col-12">
         <mat-label class="label-modal" for="reasonAppointment">Motivo de la cita:</mat-label>
-        <mat-form-field floatLabel="never" [hideRequiredMarker]="true">
-            <textarea  matInput
-                       cdkTextareaAutosize
-                       cdkAutosizeMinRows="3"
-                       cdkAutosizeMaxRows="5"
-                       id="reasonAppointment"
-                       class="form-control"
-                       placeholder="Motivo de la cita"
-                       name="reasonAppointment"
-                       required
-                       [(ngModel)]="data.appointments[0].reasonAppointment">
+        <mat-form-field class="custom-form-field-container"
+                        appearance="legacy"
+                        floatLabel="never"
+                        [hideRequiredMarker]="true">
+            <textarea [disabled]="!canCreate &&
+                                  ((otherPhysiosPermissions | checkOtherPhysiosPermissions :
+                                                              firebaseAuth.getPhysioDNI() :
+                                                              dniAux[0] :
+                                                              'Edit') ||
+                                  (!firebaseAuth.getPhysioDNI() && (otherPatientsPermissions | checkOtherPatientsPermissions :
+                                                                                               firebaseAuth.getEmail() :
+                                                                                               patientAux.email :
+                                                                                               'Edit')))"
+                      [ngClass]="{ 'custom-disabled' : !canCreate &&
+                                  ((otherPhysiosPermissions | checkOtherPhysiosPermissions :
+                                                              firebaseAuth.getPhysioDNI() :
+                                                              dniAux[0] :
+                                                              'Edit') ||
+                                  (!firebaseAuth.getPhysioDNI() && (otherPatientsPermissions | checkOtherPatientsPermissions :
+                                                                                               firebaseAuth.getEmail() :
+                                                                                               patientAux.email :
+                                                                                               'Edit'))) }"
+                      matInput
+                      cdkTextareaAutosize
+                      cdkAutosizeMinRows="2"
+                      cdkAutosizeMaxRows="5"
+                      id="reasonAppointment"
+                      placeholder="Motivo de la cita"
+                      name="reasonAppointment"
+                      required
+                      [(ngModel)]="data.appointments[0].reasonAppointment">
             </textarea>
         </mat-form-field>
       </div>
     </div>
     <div class="row row-modal">
       <div class="col-6">
+        <mat-label class="label-modal" for="physio">Fisioterapeuta:</mat-label>
+        <mat-form-field class="custom-form-field-container"
+                        appearance="legacy"
+                        floatLabel="never"
+                        [hideRequiredMarker]="true">
+          <mat-select [disabled]="!canCreate && ((otherPhysiosPermissions | checkOtherPhysiosPermissions :
+                                                                            firebaseAuth.getPhysioDNI() :
+                                                                            dniAux[0] :
+                                                                            'Edit') ||
+                                  (!firebaseAuth.getPhysioDNI() &&
+                                  (otherPatientsPermissions | checkOtherPatientsPermissions :
+                                                              firebaseAuth.getEmail() :
+                                                              patientAux.email :
+                                                              'Edit')))"
+                      required
+                      name="physio"
+                      id="physio"
+                      placeholder="Seleccione un fisioterapeuta"
+                      [(ngModel)]="data.appointments[0].treatment.physio.dni"
+                      (ngModelChange)="changeWorkingHoursAndWorkingDate($event, 0)">
+            <mat-option placement="{{i === 0 ? 'bottom' : 'top'}}"
+                        ngbTooltip="{{physio.email}}"
+                        *ngFor="let physio of physios; let i = index"
+                        [value]="physio.dni"
+                        [disabled]="otherPhysiosPermissions | checkOtherPhysiosPermissions :
+                                                              firebaseAuth.getPhysioDNI() :
+                                                              physio.dni :
+                                                              'Create'">
+              {{physio.fullName}}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+      <div class="col-6">
+        <mat-label class="label-modal" for="room">Sala:</mat-label>
+        <mat-form-field class="custom-form-field-container"
+                        appearance="legacy"
+                        floatLabel="never"
+                        [hideRequiredMarker]="true">
+          <mat-select [disabled]="!canCreate && ((otherPhysiosPermissions | checkOtherPhysiosPermissions :
+                                                                            firebaseAuth.getPhysioDNI() :
+                                                                            dniAux[0] :
+                                                                            'Edit') ||
+                                  (!firebaseAuth.getPhysioDNI() &&
+                                  (otherPatientsPermissions | checkOtherPatientsPermissions :
+                                                              firebaseAuth.getEmail() :
+                                                              patientAux.email :
+                                                              'Edit')))"
+                      required
+                      name="room"
+                      id="room"
+                      placeholder="Seleccione una sala"
+                      [(ngModel)]="data.appointments[0].room.id">
+            <mat-option [disabled]="checkAvailableRoom(room.id, data.appointments[0].startAppointment, selectedHour[0])"
+                        *ngFor="let room of rooms"
+                        [value]="room.id">
+              {{room.number}} | {{room.name}}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+    </div>
+    <div class="row row-modal">
+      <div class="col-6">
         <mat-label class="label-modal" for="dateAppointment">Fecha de la cita:</mat-label>
-        <mat-form-field floatLabel="never" [hideRequiredMarker]="true">
+        <mat-form-field id="{{!(!canCreate &&
+                                  ((otherPhysiosPermissions | checkOtherPhysiosPermissions :
+                                                              firebaseAuth.getPhysioDNI() :
+                                                              dniAux[0] :
+                                                              'Edit') ||
+                                  (!firebaseAuth.getPhysioDNI() && (otherPatientsPermissions | checkOtherPatientsPermissions :
+                                                                                               firebaseAuth.getEmail() :
+                                                                                               patientAux.email :
+                                                                                               'Edit'))))
+                                  ? 'date-appointment-container' : ''}}"
+                        (click)="picker.open()"
+                        class="bottom-lift custom-form-field-container"
+                        appearance="standard"
+                        floatLabel="never"
+                        [hideRequiredMarker]="true">
           <input matInput
-                 class="form-control"
                  name="dateAppointment"
                  id="dateAppointment"
-                 placeholder="Elija una fecha"
+                 class="dateAppointment"
+                 placeholder="Seleccione una fecha"
                  [matDatepicker]="picker"
-                 [matDatepickerFilter]="filteringSatAndMonday"
+                 [matDatepickerFilter]="filteringNonWorkingDays"
                  required
                  disabled
+                 [ngClass]="{ 'custom-disabled' : !canCreate &&
+                                  ((otherPhysiosPermissions | checkOtherPhysiosPermissions :
+                                                              firebaseAuth.getPhysioDNI() :
+                                                              dniAux[0] :
+                                                              'Edit') ||
+                                  (!firebaseAuth.getPhysioDNI() && (otherPatientsPermissions | checkOtherPatientsPermissions :
+                                                                                               firebaseAuth.getEmail() :
+                                                                                               patientAux.email :
+                                                                                               'Edit'))),
+                              'dateAppointmentClickable' : !(!canCreate &&
+                                  ((otherPhysiosPermissions | checkOtherPhysiosPermissions :
+                                                              firebaseAuth.getPhysioDNI() :
+                                                              dniAux[0] :
+                                                              'Edit') ||
+                                  (!firebaseAuth.getPhysioDNI() && (otherPatientsPermissions | checkOtherPatientsPermissions :
+                                                                                               firebaseAuth.getEmail() :
+                                                                                               patientAux.email :
+                                                                                               'Edit')))) }"
                  [(ngModel)]="data.appointments[0].startAppointment">
-          <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-          <mat-datepicker #picker disabled="false" color="accent"></mat-datepicker>
+          <mat-datepicker-toggle class="calendar-icon-modal" matSuffix [for]="picker"></mat-datepicker-toggle>
+          <mat-datepicker #picker
+                          [disabled]="!canCreate &&
+                                      ((otherPhysiosPermissions | checkOtherPhysiosPermissions :
+                                                                  firebaseAuth.getPhysioDNI() :
+                                                                  dniAux[0] :
+                                                                  'Edit') ||
+                                      (!firebaseAuth.getPhysioDNI() &&
+                                      (otherPatientsPermissions | checkOtherPatientsPermissions :
+                                                                  firebaseAuth.getEmail() :
+                                                                  patientAux.email :
+                                                                  'Edit')))"
+                          color="accent">
+          </mat-datepicker>
         </mat-form-field>
       </div>
       <div class="col-6">
         <mat-label class="label-modal" for="startAppointment">Hora de la cita:</mat-label>
-        <mat-form-field floatLabel="never" [hideRequiredMarker]="true">
-          <select class="form-control"
-                  required
-                  matNativeControl
-                  name="startAppointment"
-                  id="startAppointment"
-                  [(ngModel)]="selectedHour[0]">
-            <option *ngFor="let workingHour of workingHours"
-                    [value]="workingHour">
+        <mat-form-field class="custom-form-field-container"
+                        appearance="legacy"
+                        floatLabel="never"
+                        [hideRequiredMarker]="true">
+          <mat-select [disabled]="!canCreate &&
+                                  ((otherPhysiosPermissions | checkOtherPhysiosPermissions :
+                                                              firebaseAuth.getPhysioDNI() :
+                                                              dniAux[0] :
+                                                              'Edit') ||
+                                  (!firebaseAuth.getPhysioDNI() &&
+                                  (otherPatientsPermissions | checkOtherPatientsPermissions :
+                                                              firebaseAuth.getEmail() :
+                                                              patientAux.email :
+                                                              'Edit'))) ||
+                                  (!data.appointments[0].startAppointment) ||
+                                  checkMaxAppointmentsPerSlot(selectedHour[0], data.appointments[0])"
+                      required
+                      placeholder="Seleccione una hora"
+                      name="startAppointment"
+                      id="startAppointment"
+                      [(ngModel)]="selectedHour[0]">
+            <mat-option [disabled]="checkMaxAppointmentsPerSlot(workingHour, data.appointments[0])"
+                        *ngFor="let workingHour of workingHours[0]" [value]="workingHour">
               {{workingHour}}
-            </option>
-          </select>
+            </mat-option>
+          </mat-select>
         </mat-form-field>
       </div>
     </div>
     <div class="footer-modal">
-      <button *ngIf="canEdit" type="submit" class="button edit-btn">Editar</button>
-      <button *ngIf="canDelete"
+      <button *ngIf="canEdit &&
+                     (((firebaseAuth.getPhysioDNI() &&
+                     !(otherPhysiosPermissions | checkOtherPhysiosPermissions : firebaseAuth.getPhysioDNI() :
+                                                                                dniAux[0] :
+                                                                                'Edit')) ||
+                     !(otherPatientsPermissions | checkOtherPatientsPermissions: firebaseAuth.getEmail() :
+                                                                                 patientAux.email :
+                                                                                 'Edit')))"
+              type="submit"
+              class="button edit-btn">Editar</button>
+      <button *ngIf="canDelete &&
+                     (((firebaseAuth.getPhysioDNI() &&
+                     !(otherPhysiosPermissions | checkOtherPhysiosPermissions : firebaseAuth.getPhysioDNI() :
+                                                                                dniAux[0] :
+                                                                                'Delete')) ||
+                     !(otherPatientsPermissions | checkOtherPatientsPermissions: firebaseAuth.getEmail() :
+                                                                                 patientAux.email :
+                                                                                 'Delete')))"
               type="button"
               class="button delete-btn"
               (click)="deleteAppointment(data.appointments[0])">Borrar</button>
@@ -113,92 +315,260 @@
   <form #appointmentsListForm="ngForm"
         (ngSubmit)="appointmentsListForm.form.valid && onSubmitListAppointments(data.appointments)">
     <div class="row" id="list-appointments-container">
-      <div [ngClass]="addPhysioColor(appointment.treatment.physio.dni)"
+      <div [ngClass]="addPhysioColor(appointment.treatment.patient.uid ,appointment.treatment.physio.dni)"
            class="col-5 list-appointments-modal"
            *ngFor="let appointment of data.appointments; let i = index">
         <div class="container-close-modal">
-          <span class="icon-delete-appointment" (click)="deleteAppointment(appointment)">X</span>
+          <span *ngIf="canDelete &&
+                     (((firebaseAuth.getPhysioDNI() &&
+                     !(otherPhysiosPermissions | checkOtherPhysiosPermissions : firebaseAuth.getPhysioDNI() :
+                                                                                dniAux[i] :
+                                                                                'Delete')) ||
+                     !(otherPatientsPermissions | checkOtherPatientsPermissions: firebaseAuth.getEmail() :
+                                                                                 appointment.treatment.patient.email :
+                                                                                 'Delete')))"
+                class="icon-delete-appointment"
+                (click)="deleteAppointment(appointment)">X</span>
         </div>
-        <div>
+        <div *ngIf="firebaseAuth.getPhysioDNI() || !(otherPatientsPermissions | checkOtherPatientsPermissions :
+                                                                                firebaseAuth.getEmail() :
+                                                                                appointment.treatment.patient.email :
+                                                                                'Create')">
           <mat-label class="label-modal" [attr.for]="'patient' + i">Paciente:</mat-label>
-          <mat-form-field floatLabel="never" [hideRequiredMarker]="true">
+          <mat-form-field class="custom-form-field-container"
+                          appearance="legacy"
+                          floatLabel="never"
+                          [hideRequiredMarker]="true">
             <input [disabled]="!canCreate"
                    required
                    matInput
                    type="text"
                    id="patient{{i}}"
-                   class="form-control"
-                   placeholder="Nombre del paciente"
+                   class="custom-form-field custom-disabled"
                    name="patient{{i}}"
-                   [(ngModel)]="appointment.treatment.patient.name">
+                   [(ngModel)]="appointment.treatment.patient.fullName">
           </mat-form-field>
         </div>
-        <div>
-          <mat-label class="label-modal" [attr.for]="'room' + i">Sala:</mat-label>
-          <mat-form-field floatLabel="never" [hideRequiredMarker]="true">
-            <input matInput
-                   required
-                   type="number"
-                   id="room{{i}}"
-                   class="form-control"
-                   placeholder="Elija sala"
-                   name="room{{i}}"
-                   [(ngModel)]="appointment.roomNumber">
-          </mat-form-field>
-        </div>
-        <div>
+        <div *ngIf="firebaseAuth.getPhysioDNI() || !(otherPatientsPermissions | checkOtherPatientsPermissions :
+                                                                                firebaseAuth.getEmail() :
+                                                                                appointment.treatment.patient.email :
+                                                                                'Create')">
           <mat-label class="label-modal" [attr.for]="'reasonAppointment' + i">Motivo de la cita:</mat-label>
-          <mat-form-field floatLabel="never" [hideRequiredMarker]="true">
-              <textarea  matInput
-                         cdkTextareaAutosize
-                         cdkAutosizeMinRows="3"
-                         cdkAutosizeMaxRows="5"
-                         id="reasonAppointment{{i}}"
-                         class="form-control"
-                         placeholder="Motivo de la cita"
-                         name="reasonAppointment{{i}}"
-                         required
-                         [(ngModel)]="appointment.reasonAppointment">
+          <mat-form-field class="custom-form-field-container"
+                          appearance="legacy"
+                          floatLabel="never"
+                          [hideRequiredMarker]="true">
+              <textarea [disabled]="!canCreate &&
+                                    ((otherPhysiosPermissions | checkOtherPhysiosPermissions :
+                                                              firebaseAuth.getPhysioDNI() :
+                                                              dniAux[i] :
+                                                              'Edit') ||
+                                    (!firebaseAuth.getPhysioDNI() &&
+                                    (otherPatientsPermissions | checkOtherPatientsPermissions :
+                                                                firebaseAuth.getEmail() :
+                                                                appointment.treatment.patient.email :
+                                                                'Edit')))"
+                        [ngClass]="{ 'custom-disabled' : !canCreate &&
+                                    ((otherPhysiosPermissions | checkOtherPhysiosPermissions :
+                                                                firebaseAuth.getPhysioDNI() :
+                                                                dniAux[i] :
+                                                                'Edit') ||
+                                    (!firebaseAuth.getPhysioDNI() &&
+                                    (otherPatientsPermissions | checkOtherPatientsPermissions :
+                                                                firebaseAuth.getEmail() :
+                                                                appointment.treatment.patient.email :
+                                                                'Edit'))) }"
+
+                        matInput
+                        cdkTextareaAutosize
+                        cdkAutosizeMinRows="3"
+                        cdkAutosizeMaxRows="5"
+                        id="reasonAppointment{{i}}"
+                        class="custom-form-field"
+                        placeholder="Motivo de la cita"
+                        name="reasonAppointment{{i}}"
+                        required
+                        [(ngModel)]="appointment.reasonAppointment">
               </textarea>
           </mat-form-field>
         </div>
         <div>
+          <mat-label class="label-modal" [attr.for]="'physio' + i">Fisioterapeuta:</mat-label>
+          <mat-form-field class="custom-form-field-container"
+                          appearance="legacy"
+                          floatLabel="never"
+                          [hideRequiredMarker]="true">
+            <mat-select [disabled]="!canCreate && ((otherPhysiosPermissions | checkOtherPhysiosPermissions :
+                                                                              firebaseAuth.getPhysioDNI() :
+                                                                              dniAux[i] :
+                                                                              'Edit') ||
+                                    (!firebaseAuth.getPhysioDNI() &&
+                                    (otherPatientsPermissions | checkOtherPatientsPermissions :
+                                                                firebaseAuth.getEmail() :
+                                                                appointment.treatment.patient.email :
+                                                                'Edit')))"
+                        required
+                        name="physio{{i}}"
+                        id="physio{{i}}"
+                        class="custom-form-field"
+                        placeholder="Seleccione un fisioterapeuta"
+                        [(ngModel)]="appointment.treatment.physio.dni"
+                        (ngModelChange)="changeWorkingHoursAndWorkingDate($event, i)">
+              <mat-option placement="{{i === 0 ? 'bottom' : 'top'}}"
+                          ngbTooltip="{{physio.email}}"
+                          *ngFor="let physio of physios; let i = index"
+                          [value]="physio.dni"
+                          [disabled]="otherPhysiosPermissions | checkOtherPhysiosPermissions :
+                                                              firebaseAuth.getPhysioDNI() :
+                                                              physio.dni :
+                                                              'Create'">
+                {{physio.fullName}}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+        <div>
+          <mat-label class="label-modal" [attr.for]="'room' + i">Sala:</mat-label>
+          <mat-form-field class="custom-form-field-container"
+                          appearance="legacy"
+                          floatLabel="never"
+                          [hideRequiredMarker]="true">
+            <mat-select [disabled]="!canCreate && ((otherPhysiosPermissions | checkOtherPhysiosPermissions :
+                                                                              firebaseAuth.getPhysioDNI() :
+                                                                              dniAux[i] :
+                                                                              'Edit') ||
+                                    (!firebaseAuth.getPhysioDNI() &&
+                                    (otherPatientsPermissions | checkOtherPatientsPermissions :
+                                                                firebaseAuth.getEmail() :
+                                                                appointment.treatment.patient.email :
+                                                              'Edit')))"
+                        required
+                        name="room{{i}}"
+                        id="room{{i}}"
+                        class="custom-form-field"
+                        placeholder="Seleccione una sala"
+                        [(ngModel)]="appointment.room.id">
+              <mat-option [disabled]="checkAvailableRoom(room.id, data.appointments[i].startAppointment, selectedHour[i])"
+                          *ngFor="let room of rooms"
+                          [value]="room.id">
+                {{room.number}} | {{room.name}}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+        <div>
           <mat-label class="label-modal" [attr.for]="'dateAppointment' + i">Fecha de la cita:</mat-label>
-          <mat-form-field floatLabel="never" [hideRequiredMarker]="true">
+          <mat-form-field (click)="picker.open()"
+                          id="{{!(!canCreate &&
+                                  ((otherPhysiosPermissions | checkOtherPhysiosPermissions :
+                                                              firebaseAuth.getPhysioDNI() :
+                                                              dniAux[i] :
+                                                              'Edit') ||
+                                  (!firebaseAuth.getPhysioDNI() && (otherPatientsPermissions | checkOtherPatientsPermissions :
+                                                                                               firebaseAuth.getEmail() :
+                                                                                               appointment.treatment.patient.email :
+                                                                                               'Edit'))))
+                                  ? 'date-appointment-container-list' : ''}}"
+
+                          class="bottom-lift custom-form-field-container"
+                          appearance="standard"
+                          floatLabel="never"
+                          [hideRequiredMarker]="true">
             <input matInput
+                   class="custom-form-field dateAppointment"
+                   name="dateAppointment{{i}}"
+                   id="dateAppointment{{i}}"
+                   placeholder="Elija una fecha"
+                   [matDatepicker]="picker"
+                   [matDatepickerFilter]="filteringNonWorkingDaysList"
+                   [ngClass]="{ 'custom-disabled' : !canCreate &&
+                                ((otherPhysiosPermissions | checkOtherPhysiosPermissions :
+                                                            firebaseAuth.getPhysioDNI() :
+                                                            dniAux[i] :
+                                                            'Edit') ||
+                                (!firebaseAuth.getPhysioDNI() && (otherPatientsPermissions | checkOtherPatientsPermissions :
+                                                                                             firebaseAuth.getEmail() :
+                                                                                             appointment.treatment.patient.email :
+                                                                                             'Edit'))),
+                                'dateAppointmentClickable' : !(!canCreate &&
+                                 ((otherPhysiosPermissions | checkOtherPhysiosPermissions :
+                                                             firebaseAuth.getPhysioDNI() :
+                                                             dniAux[i] :
+                                                             'Edit') ||
+                                 (!firebaseAuth.getPhysioDNI() && (otherPatientsPermissions | checkOtherPatientsPermissions :
+                                                                                              firebaseAuth.getEmail() :
+                                                                                              appointment.treatment.patient.email :
+                                                                                              'Edit')))) }"
                    required
                    disabled
-                   name="dateAppointment"
-                   id="dateAppointment{{i}}"
-                   [matDatepicker]="picker"
-                   [matDatepickerFilter]="filteringSatAndMonday"
                    [(ngModel)]="appointment.startAppointment">
-            <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-            <mat-datepicker disabled="false" #picker color="accent"></mat-datepicker>
+            <mat-datepicker-toggle class="calendar-icon-modal-list" matSuffix [for]="picker"></mat-datepicker-toggle>
+            <mat-datepicker [disabled]="!canCreate &&
+                                        ((otherPhysiosPermissions | checkOtherPhysiosPermissions :
+                                                                    firebaseAuth.getPhysioDNI() :
+                                                                    dniAux[i] :
+                                                                    'Edit') ||
+                                        (!firebaseAuth.getPhysioDNI() &&
+                                        (otherPatientsPermissions | checkOtherPatientsPermissions :
+                                                                    firebaseAuth.getEmail() :
+                                                                    appointment.treatment.patient.email :
+                                                                    'Edit')))"
+                            #picker
+                            color="accent"></mat-datepicker>
           </mat-form-field>
         </div>
         <div>
           <mat-label class="label-modal" [attr.for]="'startAppointment' + i">Hora de la cita:</mat-label>
-          <mat-form-field floatLabel="never" [hideRequiredMarker]="true">
-            <select required
-                    matNativeControl
-                    name="startAppointment"
-                    id="startAppointment{{i}}"
-                    [(ngModel)]="selectedHour[i]">
-              <option *ngFor="let workingHour of workingHours"
-                      [value]="workingHour">
+          <mat-form-field class="custom-form-field-container"
+                          appearance="legacy"
+                          floatLabel="never"
+                          [hideRequiredMarker]="true">
+            <mat-select [disabled]="!canCreate &&
+                                  ((otherPhysiosPermissions | checkOtherPhysiosPermissions :
+                                                              firebaseAuth.getPhysioDNI() :
+                                                              dniAux[i] :
+                                                              'Edit') ||
+                                  (!firebaseAuth.getPhysioDNI() &&
+                                  (otherPatientsPermissions | checkOtherPatientsPermissions :
+                                                              firebaseAuth.getEmail() :
+                                                              appointment.treatment.patient.email :
+                                                              'Edit'))) ||
+                                  (!data.appointments[0].startAppointment)"
+                        required
+                        name="startAppointment{{i}}"
+                        id="startAppointment{{i}}"
+                        class="custom-form-field"
+                        [(ngModel)]="selectedHour[i]">
+              <mat-option disabled="true" [value]="'0'">
+                Seleccione una hora
+              </mat-option>
+              <mat-option [disabled]="checkMaxAppointmentsPerSlot(workingHour, appointment)"
+                *ngFor="let workingHour of workingHours[i]" [value]="workingHour">
                 {{workingHour}}
-              </option>
-            </select>
+              </mat-option>
+            </mat-select>
           </mat-form-field>
         </div>
       </div>
     </div>
     <div class="footer-modal">
-      <button *ngIf="canEdit"
+      <button *ngIf="canEdit && appointmentsListForm.form.valid"
               type="submit"
               class="button edit-btn">Editar</button>
       <button type="button" class="button cancel-btn" (click)="closeDialog()">Cancelar</button>
     </div>
   </form>
+</div>
+
+<div *ngIf="data.appointments.length === 0">
+  <div class="container-close-modal">
+    <span class="icon-close-modal" (click)="closeDialog()">X</span>
+  </div>
+  <div class="header-modal no-border">
+    {{data.title}}
+  </div>
+  <div class="footer-modal no-border">
+    <button type="button" class="button delete-btn" (click)="confirmDelete()">Borrar</button>
+    <button type="button" class="button cancel-btn" (click)="closeDialog()">Cancelar</button>
+  </div>
 </div>
