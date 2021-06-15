@@ -1,18 +1,5 @@
 @import "src/app/variables";
 
-input:disabled::-webkit-input-placeholder { /* WebKit browsers */
-  color:    red;
-}
-input:disabled:-moz-placeholder { /* Mozilla Firefox 4 to 18 */
-  color:    red;
-}
-input:disabled::-moz-placeholder { /* Mozilla Firefox 19+ */
-  color:    red;
-}
-input:disabled:-ms-input-placeholder { /* Internet Explorer 10+ */
-  color:    red;
-}
-
 mat-form-field {
   width: 70%;
   float: left;
@@ -25,7 +12,7 @@ mat-form-field {
 }
 
 #errorPatients {
-  color: $physio3-color
+  color: $dark-red
 }
 
 #date-appointment-container, #date-appointment-container-list {
@@ -33,7 +20,7 @@ mat-form-field {
     background-color: black;
   }
   .dateAppointment::placeholder {
-    color: $physio3-color;
+    color: $dark-red;
   }
 }
 
@@ -72,7 +59,7 @@ mat-form-field {
 }
 
 .icon-delete-appointment:hover {
-  color: $physio3-color;
+  color: $dark-red;
   background-color: white;
 }
 

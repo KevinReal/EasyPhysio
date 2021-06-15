@@ -39,6 +39,8 @@ import { RequiredDateAppointmentDirective } from './directives/required-date-app
 import { CheckOtherPatientsPermissionsPipe } from './pipes/check-other-patients-permissions.pipe';
 import { APP_INITIALIZER } from '@angular/core';
 import { FirebaseAuthService } from "./services/firebase-auth.service";
+import { FooterComponent } from './footer/footer.component';
+import { AboutUsComponent } from './about-us/about-us.component';
 
 @NgModule({
   declarations: [
@@ -58,7 +60,9 @@ import { FirebaseAuthService } from "./services/firebase-auth.service";
     EditAppointmentByLoggedUserPipe,
     SelectPatientFromListDirective,
     RequiredDateAppointmentDirective,
-    CheckOtherPatientsPermissionsPipe
+    CheckOtherPatientsPermissionsPipe,
+    FooterComponent,
+    AboutUsComponent
   ],
     imports: [
         BrowserModule,

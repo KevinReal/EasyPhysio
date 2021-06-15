@@ -46,6 +46,7 @@ export class ModalComponent implements OnInit {
   otherPatientsPermissions: flatMap<string, string[]> = {};
 
   showPatientsError = false;
+  appointmentBeforeToday = false;
 
   constructor(private matDialog: MatDialog,
               private dialogRef: MatDialogRef<ModalComponent>,
@@ -82,6 +83,7 @@ export class ModalComponent implements OnInit {
     }
     this.otherPhysiosPermissions = this.firebaseAuth.getOtherPhysiosPermissions();
     this.otherPatientsPermissions = this.firebaseAuth.getOtherPatientsPermissions();
+    this.appointmentBeforeToday = this.isBeforeToday(this.data.appointments[0]);
   }
 
   createAppointment(appointment: IAppointment): void {
@@ -178,34 +180,6 @@ export class ModalComponent implements OnInit {
 
   confirmDelete(): void {
     this.dialogRef.close('OK');
-  }
-
-  addPhysioColor(patientUid: string | undefined, dni: string): string {
-    let aux = '';
-
-    if (this.firebaseAuth.getPatientUid() && patientUid === this.firebaseAuth.getPatientUid()) {
-      aux += 'patient-bg';
-    } else {
-      aux += 'physio-bg';
-    }
-
-    switch (dni) {
-      case '12345678L':
-        aux += '1';
-        break;
-      case '12345678Q':
-        aux += '2';
-        break;
-      case '12345678P':
-        aux += '3';
-        break;
-      case '12345678K':
-        aux += '4';
-        break;
-      default:
-        break;
-    }
-    return aux;
   }
 
   filteringNonWorkingDays = (d: Moment | null): boolean => {
@@ -332,17 +306,25 @@ export class ModalComponent implements OnInit {
     });
   }
 
-  compareDatesAux(startAppointment: any, selectedHour: string, element: IAppointment): IAppointment | undefined {
+  compareDatesAux(startAppointment: any, selectedHour: string, appointment: IAppointment): IAppointment | undefined {
     const startAppointmentMoment = moment(startAppointment);
     let modifiedDateAppointment = moment(startAppointmentMoment.year() + ' '
       + (startAppointmentMoment.month() + 1) + ' '
       + startAppointmentMoment.date() + ' '
       + selectedHour,
       'yyyy MM DD hh:mm');
-    if (modifiedDateAppointment > element.startAppointment) {
-    } else if (modifiedDateAppointment < element.startAppointment) {
-    } else return element;
+    if (modifiedDateAppointment > moment(appointment.startAppointment)) {
+    } else if (modifiedDateAppointment < moment(appointment.startAppointment)) {
+    } else return appointment;
     return;
+  }
+
+  isBeforeToday(appointment: IAppointment): boolean {
+    if (moment().startOf('day') > moment(appointment.startAppointment)) {
+      return true;
+    } else if (moment().startOf('day') < moment(appointment.startAppointment)) {
+    } else return false;
+    return false;
   }
 
   focusOut() {
@@ -351,6 +333,13 @@ export class ModalComponent implements OnInit {
 
   focusIn() {
     this.showPatientsError = false;
+  }
+
+  physioGridColor(color: string, patientUid: string) {
+    if (this.firebaseAuth.getPatientUid() && patientUid === this.firebaseAuth.getPatientUid()) {
+      return JSON.parse(`{ "color": "white", "background-image": "linear-gradient(to right, black 50% , ${color} 50%)" }`);
+    }
+    return JSON.parse(`{ "color": "white", "background-color": "${color}" }`);
   }
 
 }

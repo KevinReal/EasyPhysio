@@ -11,4 +11,5 @@ export interface IPhysio {
   workingHours: string[];
   // @ts-ignore
   otherPhysiosPermissions?: flatMap<string, string[]>;
+  color: string;
 }

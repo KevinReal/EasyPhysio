@@ -11,20 +11,13 @@ import { AppointmentsPipe } from "../pipes/appointments.pipe";
 import { IPhysio } from "../models/IPhysio";
 import { MatCheckboxChange } from "@angular/material/checkbox";
 import { Moment } from "moment";
-import { FirebaseAuthService } from "../services/firebase-auth.service";
-import { faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
-import { faUserCircle } from '@fortawesome/free-solid-svg-icons';
-import { faCog } from '@fortawesome/free-solid-svg-icons';
-import { faHistory } from '@fortawesome/free-solid-svg-icons';
-import { faChartPie } from '@fortawesome/free-solid-svg-icons';
-import { faShoppingCart } from '@fortawesome/free-solid-svg-icons';
-import { faInfoCircle } from '@fortawesome/free-solid-svg-icons';
+import { FirebaseAuthService } from "../services/firebase-auth.service"
 import { ToastService } from "../services/toast.service";
 import { IRoom } from "../models/IRoom";
 import { PhysioService } from "../services/physio.service";
 import { flatMap } from "rxjs/internal/operators";
-import {ITreatment} from "../models/ITreatment";
-import {IPatient} from "../models/IPatient";
+import { ITreatment } from "../models/ITreatment";
+import { IPatient } from "../models/IPatient";
 
 @Component({
   selector: 'app-scheduler',
@@ -67,14 +60,6 @@ export class SchedulerComponent implements OnInit {
   otherUsersPermissions: flatMap<string, string[]>
 
   rooms: IRoom[] = [];
-
-  faSignOutAlt = faSignOutAlt;
-  faUserCircle = faUserCircle;
-  faHistory = faHistory;
-  faCog = faCog;
-  faChartPie = faChartPie;
-  faShoppingCart = faShoppingCart;
-  faInfoCircle = faInfoCircle;
 
   constructor(private appointmentService: AppointmentService,
               private matDialog: MatDialog,
@@ -374,10 +359,6 @@ export class SchedulerComponent implements OnInit {
     return day !== 0 && day !== 6;
   }
 
-  logout(): void {
-    this.firebaseAuth.logout();
-  }
-
   isPhysioOrPatient(): void {
     this.physioDni = this.firebaseAuth.getPhysioDNI();
     this.otherUsersPermissions = this.firebaseAuth.getOtherPhysiosPermissions();
@@ -432,6 +413,17 @@ export class SchedulerComponent implements OnInit {
       return false;
     }
     return true;
+  }
+
+  physioListColor(color: string) {
+    return JSON.parse(`{ "color": "${color}" }`);
+  }
+
+  physioGridColor(color: string, patientUid: string) {
+    if (this.loggedPatientFilter && patientUid === this.loggedPatientUid) {
+      return JSON.parse(`{ "color": "white", "background-image": "linear-gradient(to right, black 50% , ${color} 50%)" }`);
+    }
+    return JSON.parse(`{ "color": "white", "background-color": "${color}" }`);
   }
 
 }

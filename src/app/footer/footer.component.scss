@@ -1,0 +1,24 @@
+@import '../variables';
+
+#footer {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  height: 9vh;
+  background-color: white;
+  border-top: 1px solid $secondary-color;
+}
+
+.footer-content-section {
+  padding-top: 1vh;
+}
+
+.footer-content {
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.footer-content:hover {
+  text-decoration: underline;
+}
+

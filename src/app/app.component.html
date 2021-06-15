@@ -1,2 +1,33 @@
-<router-outlet></router-outlet>
-<app-toast-container aria-live="polite" aria-atomic="true"></app-toast-container>
+<mat-drawer-container class="custom-drawer" autosize>
+  <mat-drawer class="sidenav-custom" #drawer mode="over" position="end">
+    <p class="item-sidenav">
+      Mi perfil <fa-icon class="sidenav-icons" [icon]="faUserCircle"></fa-icon>
+    </p>
+    <p *ngIf="!physioDni" class="item-sidenav">
+      Mi histórico <fa-icon class="sidenav-icons" [icon]="faHistory"></fa-icon>
+    </p>
+    <p *ngIf="!physioDni" class="item-sidenav">
+      Mis bonos <fa-icon class="sidenav-icons" [icon]="faShoppingCart"></fa-icon>
+    </p>
+    <p *ngIf="!physioDni" class="item-sidenav">
+      Información sobre el centro <fa-icon class="sidenav-icons" [icon]="faInfoCircle"></fa-icon>
+    </p>
+    <p *ngIf="physioDni" class="item-sidenav">
+      Mis estadísticas <fa-icon class="sidenav-icons" [icon]="faChartPie"></fa-icon>
+    </p>
+  </mat-drawer>
+  <div class="row" id="header">
+    <div class="col-1"></div>
+    <div class="col">
+      <img src="favicon.ico" class="logo" alt="EasyPhysio">
+    </div>
+    <div *ngIf="firebaseAuth.isLoggedIn()" class="col-6 header-icons-section">
+      <fa-icon class="header-icons" (click)="drawer.toggle()" [icon]="faCog"></fa-icon>
+      <fa-icon class="header-icons" (click)="logout()" [icon]="faSignOutAlt"></fa-icon>
+    </div>
+  </div>
+
+  <router-outlet></router-outlet>
+  <app-footer></app-footer>
+  <app-toast-container aria-live="polite" aria-atomic="true"></app-toast-container>
+</mat-drawer-container>

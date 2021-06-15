@@ -20,11 +20,11 @@
                           appearance="legacy"
                           floatLabel="never"
                           [hideRequiredMarker]="true">
-            <input [disabled]="!canCreate || !firebaseAuth.getPhysioDNI()"
+            <input [disabled]="appointmentBeforeToday || !canCreate || !firebaseAuth.getPhysioDNI()"
                    matInput
                    type="text"
                    id="patientPhysio"
-                   [ngClass]="{ 'custom-disabled' : !canCreate || !firebaseAuth.getPhysioDNI() }"
+                   [ngClass]="{ 'custom-disabled' : appointmentBeforeToday || !canCreate || !firebaseAuth.getPhysioDNI() }"
                    placeholder="Seleccione un paciente"
                    name="patientPhysio"
                    required
@@ -59,7 +59,7 @@
                         name="patient"
                         id="patient"
                         placeholder="Seleccione un paciente"
-                        [disabled]="!canCreate ||
+                        [disabled]="appointmentBeforeToday || !canCreate ||
                                     filterPatientWithAppointment(data.appointments[0].treatment.patient.uid,
                                                                  data.appointments[0].startAppointment,
                                                                  selectedHour[0])"
@@ -86,7 +86,7 @@
                         appearance="legacy"
                         floatLabel="never"
                         [hideRequiredMarker]="true">
-            <textarea [disabled]="!canCreate &&
+            <textarea [disabled]="appointmentBeforeToday || !canCreate &&
                                   ((otherPhysiosPermissions | checkOtherPhysiosPermissions :
                                                               firebaseAuth.getPhysioDNI() :
                                                               dniAux[0] :
@@ -95,7 +95,7 @@
                                                                                                firebaseAuth.getEmail() :
                                                                                                patientAux.email :
                                                                                                'Edit')))"
-                      [ngClass]="{ 'custom-disabled' : !canCreate &&
+                      [ngClass]="{ 'custom-disabled' : appointmentBeforeToday || !canCreate &&
                                   ((otherPhysiosPermissions | checkOtherPhysiosPermissions :
                                                               firebaseAuth.getPhysioDNI() :
                                                               dniAux[0] :
@@ -124,7 +124,7 @@
                         appearance="legacy"
                         floatLabel="never"
                         [hideRequiredMarker]="true">
-          <mat-select [disabled]="!canCreate && ((otherPhysiosPermissions | checkOtherPhysiosPermissions :
+          <mat-select [disabled]="appointmentBeforeToday || !canCreate && ((otherPhysiosPermissions | checkOtherPhysiosPermissions :
                                                                             firebaseAuth.getPhysioDNI() :
                                                                             dniAux[0] :
                                                                             'Edit') ||
@@ -158,7 +158,7 @@
                         appearance="legacy"
                         floatLabel="never"
                         [hideRequiredMarker]="true">
-          <mat-select [disabled]="!canCreate && ((otherPhysiosPermissions | checkOtherPhysiosPermissions :
+          <mat-select [disabled]="appointmentBeforeToday || !canCreate && ((otherPhysiosPermissions | checkOtherPhysiosPermissions :
                                                                             firebaseAuth.getPhysioDNI() :
                                                                             dniAux[0] :
                                                                             'Edit') ||
@@ -208,7 +208,7 @@
                  [matDatepickerFilter]="filteringNonWorkingDays"
                  required
                  disabled
-                 [ngClass]="{ 'custom-disabled' : !canCreate &&
+                 [ngClass]="{ 'custom-disabled' : appointmentBeforeToday || !canCreate &&
                                   ((otherPhysiosPermissions | checkOtherPhysiosPermissions :
                                                               firebaseAuth.getPhysioDNI() :
                                                               dniAux[0] :
@@ -229,7 +229,7 @@
                  [(ngModel)]="data.appointments[0].startAppointment">
           <mat-datepicker-toggle class="calendar-icon-modal" matSuffix [for]="picker"></mat-datepicker-toggle>
           <mat-datepicker #picker
-                          [disabled]="!canCreate &&
+                          [disabled]="appointmentBeforeToday || !canCreate &&
                                       ((otherPhysiosPermissions | checkOtherPhysiosPermissions :
                                                                   firebaseAuth.getPhysioDNI() :
                                                                   dniAux[0] :
@@ -249,7 +249,7 @@
                         appearance="legacy"
                         floatLabel="never"
                         [hideRequiredMarker]="true">
-          <mat-select [disabled]="!canCreate &&
+          <mat-select [disabled]="appointmentBeforeToday || !canCreate &&
                                   ((otherPhysiosPermissions | checkOtherPhysiosPermissions :
                                                               firebaseAuth.getPhysioDNI() :
                                                               dniAux[0] :
@@ -275,7 +275,7 @@
       </div>
     </div>
     <div class="footer-modal">
-      <button *ngIf="canEdit &&
+      <button *ngIf="!appointmentBeforeToday && canEdit &&
                      (((firebaseAuth.getPhysioDNI() &&
                      !(otherPhysiosPermissions | checkOtherPhysiosPermissions : firebaseAuth.getPhysioDNI() :
                                                                                 dniAux[0] :
@@ -285,7 +285,7 @@
                                                                                  'Edit')))"
               type="submit"
               class="button edit-btn">Editar</button>
-      <button *ngIf="canDelete &&
+      <button *ngIf="!appointmentBeforeToday && canDelete &&
                      (((firebaseAuth.getPhysioDNI() &&
                      !(otherPhysiosPermissions | checkOtherPhysiosPermissions : firebaseAuth.getPhysioDNI() :
                                                                                 dniAux[0] :
@@ -296,7 +296,7 @@
               type="button"
               class="button delete-btn"
               (click)="deleteAppointment(data.appointments[0])">Borrar</button>
-      <button *ngIf="canCreate"
+      <button *ngIf="!appointmentBeforeToday && canCreate"
               type="submit"
               class="button create-btn">Crear</button>
       <button type="button" class="button cancel-btn" (click)="closeDialog()">Cancelar</button>
@@ -315,11 +315,11 @@
   <form #appointmentsListForm="ngForm"
         (ngSubmit)="appointmentsListForm.form.valid && onSubmitListAppointments(data.appointments)">
     <div class="row" id="list-appointments-container">
-      <div [ngClass]="addPhysioColor(appointment.treatment.patient.uid ,appointment.treatment.physio.dni)"
+      <div [ngStyle]="physioGridColor(appointment.treatment.physio.color ,appointment.treatment.patient.uid)"
            class="col-5 list-appointments-modal"
            *ngFor="let appointment of data.appointments; let i = index">
         <div class="container-close-modal">
-          <span *ngIf="canDelete &&
+          <span *ngIf="!appointmentBeforeToday && canDelete &&
                      (((firebaseAuth.getPhysioDNI() &&
                      !(otherPhysiosPermissions | checkOtherPhysiosPermissions : firebaseAuth.getPhysioDNI() :
                                                                                 dniAux[i] :
@@ -358,7 +358,7 @@
                           appearance="legacy"
                           floatLabel="never"
                           [hideRequiredMarker]="true">
-              <textarea [disabled]="!canCreate &&
+              <textarea [disabled]="appointmentBeforeToday || !canCreate &&
                                     ((otherPhysiosPermissions | checkOtherPhysiosPermissions :
                                                               firebaseAuth.getPhysioDNI() :
                                                               dniAux[i] :
@@ -368,7 +368,7 @@
                                                                 firebaseAuth.getEmail() :
                                                                 appointment.treatment.patient.email :
                                                                 'Edit')))"
-                        [ngClass]="{ 'custom-disabled' : !canCreate &&
+                        [ngClass]="{ 'custom-disabled' : appointmentBeforeToday || !canCreate &&
                                     ((otherPhysiosPermissions | checkOtherPhysiosPermissions :
                                                                 firebaseAuth.getPhysioDNI() :
                                                                 dniAux[i] :
@@ -398,7 +398,7 @@
                           appearance="legacy"
                           floatLabel="never"
                           [hideRequiredMarker]="true">
-            <mat-select [disabled]="!canCreate && ((otherPhysiosPermissions | checkOtherPhysiosPermissions :
+            <mat-select [disabled]="appointmentBeforeToday || !canCreate && ((otherPhysiosPermissions | checkOtherPhysiosPermissions :
                                                                               firebaseAuth.getPhysioDNI() :
                                                                               dniAux[i] :
                                                                               'Edit') ||
@@ -433,7 +433,7 @@
                           appearance="legacy"
                           floatLabel="never"
                           [hideRequiredMarker]="true">
-            <mat-select [disabled]="!canCreate && ((otherPhysiosPermissions | checkOtherPhysiosPermissions :
+            <mat-select [disabled]="appointmentBeforeToday || !canCreate && ((otherPhysiosPermissions | checkOtherPhysiosPermissions :
                                                                               firebaseAuth.getPhysioDNI() :
                                                                               dniAux[i] :
                                                                               'Edit') ||
@@ -481,7 +481,7 @@
                    placeholder="Elija una fecha"
                    [matDatepicker]="picker"
                    [matDatepickerFilter]="filteringNonWorkingDaysList"
-                   [ngClass]="{ 'custom-disabled' : !canCreate &&
+                   [ngClass]="{ 'custom-disabled' : appointmentBeforeToday || !canCreate &&
                                 ((otherPhysiosPermissions | checkOtherPhysiosPermissions :
                                                             firebaseAuth.getPhysioDNI() :
                                                             dniAux[i] :
@@ -503,7 +503,7 @@
                    disabled
                    [(ngModel)]="appointment.startAppointment">
             <mat-datepicker-toggle class="calendar-icon-modal-list" matSuffix [for]="picker"></mat-datepicker-toggle>
-            <mat-datepicker [disabled]="!canCreate &&
+            <mat-datepicker [disabled]="appointmentBeforeToday || !canCreate &&
                                         ((otherPhysiosPermissions | checkOtherPhysiosPermissions :
                                                                     firebaseAuth.getPhysioDNI() :
                                                                     dniAux[i] :
@@ -523,7 +523,7 @@
                           appearance="legacy"
                           floatLabel="never"
                           [hideRequiredMarker]="true">
-            <mat-select [disabled]="!canCreate &&
+            <mat-select [disabled]="appointmentBeforeToday || !canCreate &&
                                   ((otherPhysiosPermissions | checkOtherPhysiosPermissions :
                                                               firebaseAuth.getPhysioDNI() :
                                                               dniAux[i] :
@@ -552,7 +552,7 @@
       </div>
     </div>
     <div class="footer-modal">
-      <button *ngIf="canEdit && appointmentsListForm.form.valid"
+      <button *ngIf="!appointmentBeforeToday && canEdit && appointmentsListForm.form.valid"
               type="submit"
               class="button edit-btn">Editar</button>
       <button type="button" class="button cancel-btn" (click)="closeDialog()">Cancelar</button>

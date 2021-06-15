@@ -108,61 +108,6 @@ input[type=number] {
   cursor: pointer;
 }
 
-.patient-bg1 {
-  color: white;
-  background-image: linear-gradient(to right, black 50% , $physio1-color 50%)
-}
-
-.patient-bg2 {
-  color: white;
-  background-image: linear-gradient(to right, black 50% , $physio2-color 50%)
-}
-
-.patient-bg3 {
-  color: white;
-  background-image: linear-gradient(to right, black 50%, $physio3-color 50%)
-}
-.patient-bg4 {
-  color: white;
-  background-image: linear-gradient(to right, black 50%, $physio4-color 50%)
-}
-
-.physio-bg1 {
-  color: white;
-  background-color: $physio1-color;
-}
-
-.physio-bg2 {
-  color: white;
-  background-color: $physio2-color;
-}
-
-.physio-bg3 {
-  color: white;
-  background-color: $physio3-color;
-}
-
-.physio-bg4 {
-  color: white;
-  background-color: $physio4-color;
-}
-
-.physio1 {
-  color: $physio1-color;
-}
-
-.physio2 {
-  color: $physio2-color;
-}
-
-.physio3 {
-  color: $physio3-color;
-}
-
-.physio4 {
-  color: $physio4-color;
-}
-
 .login-page, .signup-page {
   display:flex;
   justify-content:center;
@@ -219,7 +164,7 @@ input[type=number] {
 }
 
 .mat-error {
-  color: $physio3-color;
+  color: $dark-red;
   font-size: 12px;
 }
 
@@ -229,4 +174,13 @@ input[type=number] {
 
 .mat-option[aria-disabled=true] {
   cursor: not-allowed !important;
+}
+
+.logo {
+  width: 65px;
+  height: 65px;
+}
+
+.fill-header-space {
+  height: 9vh;
 }

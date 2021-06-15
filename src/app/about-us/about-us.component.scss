@@ -1,0 +1,16 @@
+@import '../variables';
+
+.aboutus-page {
+  display:flex;
+  justify-content:center;
+  width: 100vw;
+  height: 91vh;
+  background-color: $primary-color;
+}
+
+.aboutus-container {
+  margin-top: 2vh;
+  width: 70vw;
+  height: 78vh;
+  background-color: white;
+}

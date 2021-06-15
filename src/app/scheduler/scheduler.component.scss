@@ -61,7 +61,7 @@
 }
 
 .grid-container {
-  height: 70vh;
+  height: 58vh;
   overflow: auto;
 }
 
@@ -81,52 +81,4 @@
   color: $day-color;
   padding: 0.8vh;
   border-radius: 20px;
-}
-
-.header-icons {
-  color: $secondary-color;
-  font-size: 30px;
-  margin-right: 1vw;
-  cursor: pointer;
-}
-
-.header-icons:hover {
-  color: $secondary-color-hover;
-}
-
-.item-sidenav:hover .sidenav-icons {
-  color: white;
-}
-
-.sidenav-icons {
-  color: $secondary-color;
-  font-size: 25px;
-  margin-left: 1vw;
-  cursor: pointer;
-}
-
-.header-container {
-  text-align: end;
-  padding-top: 2vh;
-}
-
-.sidenav-custom {
-  width: 20vw;
-  text-align: center;
-}
-
-.item-sidenav {
-  font-size: 16px;
-  margin: 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 7vh;
-  cursor: pointer;
-  border-bottom: 1px solid black;
-}
-
-.item-sidenav:hover {
-  background-color: $secondary-color;
-  font-weight: bold;
 }
