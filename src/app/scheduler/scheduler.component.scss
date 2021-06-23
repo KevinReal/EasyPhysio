@@ -1,84 +1,101 @@
 @import '../variables';
 
-#datepicker-input {
-  visibility: hidden;
-  width: 0;
-}
-
-#date-to-display {
-  font-weight: bold;
-  margin: 0 5px;
-}
-
-#calendar-icon:hover {
-  color: $tertiary-color;
-}
-
-.align-center {
-  text-align: center;
-}
-
-.first-column {
-  height: 5vh;
-  text-align: center;
-}
-
-.drop-list-grid {
-  height: 5vh;
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  border: 1px solid $secondary-color;
-}
-
-.cdk-drop-list-dragging {
-  cursor: grabbing;
-}
-
 .calendar-container {
   border-bottom: 1px solid $secondary-color;
   display: flex;
   align-items: center;
   justify-content: center;
   min-height: 10vh;
+
+  #date-to-display {
+    font-weight: bold;
+    margin: 0 5px;
+  }
+
+  .arrow {
+    margin-left: 10px;
+    cursor: pointer;
+    padding: 0 10px;
+    font-size: 24px;
+    border-radius: 20px;
+    &:hover {
+      background-color: $tertiary-color;
+    }
+  }
+
+  #datepicker-input {
+    visibility: hidden;
+    width: 0;
+  }
+
+  #calendar-icon {
+    &:hover {
+      color: $tertiary-color;
+    }
+  }
+
+  .truncate-physios-names {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 10vw;
+  }
 }
 
-.disable-non-working-hours {
-  background-color: $primary-color;
-  cursor: not-allowed;
-}
+.weekdays-container {
+  margin-top: 5vh;
 
-.arrow {
-  margin-left: 10px;
-  cursor: pointer;
-  padding: 0 10px;
-  font-size: 24px;
-  border-radius: 20px;
-}
+  .align-center {
+    text-align: center;
 
-.arrow:hover, .weekdays-style:hover {
-  background-color: $tertiary-color;
+    .weekdays-style {
+      cursor: pointer;
+      font-size: 22px;
+      color: $day-color;
+      padding: 0.8vh;
+      border-radius: 20px;
+      &:hover {
+        background-color: $tertiary-color;
+      }
+    }
+  }
 }
 
 .grid-container {
   height: 58vh;
   overflow: auto;
+
+  .first-column {
+    height: 5vh;
+    text-align: center;
+  }
+
+  .disable-non-working-hours {
+    background-color: $primary-color;
+    cursor: not-allowed;
+  }
+
+  .drop-list-grid {
+    height: 5vh;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    border: 1px solid $secondary-color;
+
+  }
+
+  .cdk-drop-list-dragging {
+    cursor: grabbing;
+  }
 }
 
-.weekdays-container {
-  margin-top: 5vh;
-}
-
-.truncate-physios-names {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  width: 10vw;
-}
-
-.weekdays-style {
+.grid-scheduler {
+  border: 1px solid black;
+  height: 5vh;
+  padding: 1vh;
+  background: black;
+  color: white;
+  flex-grow: 1;
+  flex-basis: 0;
+  border-radius: 10px;
   cursor: pointer;
-  font-size: 22px;
-  color: $day-color;
-  padding: 0.8vh;
-  border-radius: 20px;
 }

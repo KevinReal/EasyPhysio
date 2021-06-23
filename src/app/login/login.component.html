@@ -32,7 +32,7 @@
                  #emailPattern="ngModel"
                  appEmailPattern
                  [(ngModel)]="emailSignIn">
-          <mat-error class="input-error" *ngIf="emailPattern.touched && emailPattern.errors?.invalidEmail">
+          <mat-error *ngIf="emailPattern.touched && emailPattern.errors?.invalidEmail">
             El formato del correo electrónico no es válido.
           </mat-error>
         </mat-form-field>

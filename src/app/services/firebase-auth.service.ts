@@ -72,6 +72,14 @@ export class FirebaseAuthService {
     return JSON.parse(<string>sessionStorage.getItem('user')).email;
   }
 
+  getColor(): string {
+    return JSON.parse(<string>sessionStorage.getItem('user')).color;
+  }
+
+  getFullName(): string {
+    return JSON.parse(<string>sessionStorage.getItem('user')).fullName;
+  }
+
   checkPersistedLogin() {
     if (!!localStorage.getItem('user')) {
       sessionStorage.setItem('user', <string>localStorage.getItem('user'));

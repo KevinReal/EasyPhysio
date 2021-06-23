@@ -11,7 +11,7 @@ mat-form-field {
   height: 58vh;
 }
 
-#errorPatients {
+.errorCustom {
   color: $dark-red
 }
 
@@ -27,16 +27,28 @@ mat-form-field {
 .calendar-icon-modal {
   position: relative;
   top: 5px;
-}
+  &:hover {
+    color: $tertiary-color;
+  }
 
-.calendar-icon-modal:hover, .calendar-icon-modal-list:hover {
-  color: $tertiary-color;
+  .mat-icon-button.mat-button-disabled.mat-button-disabled {
+    color: rgba(0, 0, 0, 0.54);
+    cursor: not-allowed;
+  }
 }
 
 .calendar-icon-modal-list {
   position: relative;
   bottom: 5px;
   color: white;
+  &:hover {
+    color: $tertiary-color;
+  }
+
+  .mat-icon-button.mat-button-disabled.mat-button-disabled {
+    color: white;
+    cursor: not-allowed;
+  }
 }
 
 .container-close-modal {
@@ -107,34 +119,24 @@ mat-form-field {
   bottom:15px;
 }
 
-.custom-form-field-container .custom-form-field {
-  background-color: white;
-  padding: 10px 0 10px 10px;
-}
+.custom-form-field-container {
+  .custom-form-field {
+    background-color: white;
+    padding: 10px 0 10px 10px;
+  }
 
-.custom-form-field-container .custom-disabled {
-  cursor: not-allowed;
-}
+  .dateAppointmentClickable {
+    cursor: pointer;
+  }
 
-.mat-select-disabled .mat-select-value {
-  color: black;
-  cursor: not-allowed;
-}
-
-.custom-form-field-container .dateAppointmentClickable {
-  cursor: pointer;
-}
-
-.calendar-icon-modal-list  {
-  .mat-icon-button.mat-button-disabled.mat-button-disabled {
-    color: white;
+  .custom-disabled {
     cursor: not-allowed;
   }
 }
 
-.calendar-icon-modal  {
-  .mat-icon-button.mat-button-disabled.mat-button-disabled {
-    color: rgba(0, 0, 0, 0.54);
+.mat-select-disabled {
+  .mat-select-value {
+    color: black;
     cursor: not-allowed;
   }
 }

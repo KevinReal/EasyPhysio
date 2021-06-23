@@ -1,0 +1,117 @@
+<div class="fill-header-space"></div>
+<div class="report-page">
+  <div class="report-container">
+    <div class="report-stats">
+      <ngx-charts-bar-vertical
+        [view]="view"
+        [legend]="legend"
+        [animations]="animations"
+        [noBarWhenZero]="noBarWhenZero"
+        [legendTitle]="legendTitleVerticalBar"
+        [scheme]="colorSchemeVerticalBar"
+        [results]="appointmentsByPhysioAndRangeOfDates"
+        [xAxis]="showXAxisVerticalBar"
+        [yAxis]="showYAxisVerticalBar"
+        [showYAxisLabel]="showYAxisLabelVerticalBar"
+        [showXAxisLabel]="showXAxisLabelVerticalBar"
+        [xAxisLabel]="xAxisLabelVerticalBar"
+        [yAxisLabel]="yAxisLabelVerticalBar">
+      </ngx-charts-bar-vertical>
+    </div>
+    <div class="radio-button-container">
+      <mat-radio-group aria-label="Seleccione una opción">
+        <div class="row">
+          <div class="col-2"></div>
+          <div *ngFor="let week of weeksToAddVerticalBar; let i = index" class="col-3">
+            <mat-radio-button [checked]="i === 0" (change)="getAppointmentsByPhysioAndRangeOfDates(week)" value="{{week}}">
+              <strong>{{labelsRadioButtonVerticalBar[i]}}</strong>
+            </mat-radio-button>
+          </div>
+        </div>
+      </mat-radio-group>
+    </div>
+    <div class="report-stats">
+      <ngx-charts-bar-vertical-stacked
+        [view]="view"
+        [legend]="legend"
+        [animations]="animations"
+        [noBarWhenZero]="noBarWhenZero"
+        [legendTitle]="legendTitleMultipleVerticalBar"
+        [scheme]="colorSchemeMultipleVerticalBar"
+        [results]="appointmentsByPhysioAndDay"
+        [xAxis]="showXAxisMultipleVerticalBar"
+        [yAxis]="showYAxisMultipleVerticalBar"
+        [showXAxisLabel]="showXAxisLabelMultipleVerticalBar"
+        [showYAxisLabel]="showYAxisLabelMultipleVerticalBar"
+        [xAxisLabel]="xAxisLabelMultipleVerticalBar"
+        [yAxisLabel]="yAxisLabelMultipleVerticalBar">
+      </ngx-charts-bar-vertical-stacked>
+    </div>
+    <div class="radio-button-container">
+      <mat-radio-group aria-label="Seleccione una opción">
+        <div class="row">
+          <div class="col-3"></div>
+          <div *ngFor="let week of weeksToAddMultipleVerticalBar; let i = index" class="col-3">
+            <mat-radio-button [checked]="i === 0" (change)="getAppointmentsByPhysioAndDay(week)" value="{{week}}">
+              <strong>{{labelsCheckboxMultipleVerticalBar[i]}}</strong>
+            </mat-radio-button>
+          </div>
+        </div>
+      </mat-radio-group>
+    </div>
+    <div class="report-stats">
+      <ngx-charts-number-card
+        [view]="view"
+        [animations]="animations"
+        [scheme]="colorSchemeNumberCard"
+        [results]="appointmentsByPatientAndDates | showMaxAppointments : limitPatientsToShow"
+        [cardColor]="cardColor"
+        [textColor]="textColor">
+      </ngx-charts-number-card>
+    </div>
+    <div class="radio-button-container">
+      <mat-radio-group aria-label="Seleccione una opción">
+        <div class="row">
+          <div class="col-2"></div>
+          <div *ngFor="let week of weeksToAddNumberCard; let i = index" class="col-3">
+            <mat-radio-button [checked]="i === 0" (change)="getAppointmentsByPatientAndRangeOfDates(week)" value="{{week}}">
+              <strong>{{labelsRadioButtonNumberCard[i]}}</strong>
+            </mat-radio-button>
+          </div>
+        </div>
+      </mat-radio-group>
+      <div class="text-align-center">
+        <mat-label class="label-modal" for="patient"><strong>Top pacientes del centro a mostrar: </strong></mat-label>
+        <mat-form-field class="input-report" appearance="legacy">
+            <input matInput type="number" [(ngModel)]="limitPatientsToShow">
+        </mat-form-field>
+      </div>
+    </div>
+    <div class="report-stats">
+      <ngx-charts-gauge
+        [view]="view"
+        [animations]="animations"
+        [legend]="legend"
+        [legendTitle]="legendTitleGauge"
+        [scheme]="colorSchemeVerticalBar"
+        [results]="appointmentsByRoomAndRangeOfDates"
+        [max]="maxGauge"
+        [units]="innerLegend"
+        [angleSpan]="angleSpanGauge"
+        [startAngle]="startAngleGauge">
+      </ngx-charts-gauge>
+    </div>
+    <div class="gauge-buttons-container">
+      <mat-radio-group aria-label="Seleccione una opción">
+        <div class="row">
+          <div class="col-2"></div>
+          <div *ngFor="let week of weeksToAddGauge; let i = index" class="col-3">
+            <mat-radio-button [checked]="i === 0" (change)="getAppointmentsByRoomAndRangeOfDates(week)" value="{{week}}">
+              <strong>{{labelsRadioButtonGauge[i]}}</strong>
+            </mat-radio-button>
+          </div>
+        </div>
+      </mat-radio-group>
+    </div>
+  </div>
+</div>

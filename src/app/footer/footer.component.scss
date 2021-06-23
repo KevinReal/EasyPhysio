@@ -7,18 +7,16 @@
   height: 9vh;
   background-color: white;
   border-top: 1px solid $secondary-color;
-}
 
-.footer-content-section {
-  padding-top: 1vh;
-}
+  .footer-content-section {
+    padding-top: 1vh;
 
-.footer-content {
-  font-weight: bold;
-  cursor: pointer;
+    .footer-content{
+      font-weight: bold;
+      cursor: pointer;
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
 }
-
-.footer-content:hover {
-  text-decoration: underline;
-}
-

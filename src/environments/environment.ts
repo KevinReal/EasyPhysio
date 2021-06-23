@@ -14,14 +14,7 @@ export const environment = {
                  '16:30','17:00','17:30','18:00','18:30','19:00','19:30'],
   workingHours: ['09:00','09:30','10:00','10:30', '11:00','11:30','12:00','12:30',
                  '16:00', '16:30','17:00','17:30','18:00','18:30','19:00','19:30'],
-  firebaseConfig: {
-    apiKey: "AIzaSyCegCQMCI4WFVucQQcJTBq2BAWu6bOQsJs",
-    authDomain: "trabajo-fin-grado-aa787.firebaseapp.com",
-    projectId: "trabajo-fin-grado-aa787",
-    storageBucket: "trabajo-fin-grado-aa787.appspot.com",
-    messagingSenderId: "342045895641",
-    appId: "1:342045895641:web:08618121ced7a2a6e087c8"
-  }
+  holidays: [0, 50, 175]
 };
 
 /*

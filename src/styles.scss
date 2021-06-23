@@ -17,18 +17,6 @@ input[type=number] {
   -moz-appearance: textfield;
 }
 
-.grid-scheduler {
-  border: 1px solid black;
-  height: 5vh;
-  padding: 1vh;
-  background: black;
-  color: white;
-  flex-grow: 1;
-  flex-basis: 0;
-  border-radius: 10px;
-  cursor: pointer;
-}
-
 .button {
   margin: 0 10px;
   color: #000;
@@ -39,37 +27,33 @@ input[type=number] {
 .secondary-btn, .cancel-btn {
   background-color: $secondary-color;
   border-color: $secondary-color;
-}
-
-.secondary-btn:hover, .cancel-btn:hover {
-  background-color: $secondary-color-hover;
+  &:hover {
+    background-color: $secondary-color-hover;
+  }
 }
 
 .edit-btn {
   background-color: $edit-color;
   border-color: $edit-color;
-}
-
-.edit-btn:hover {
-  background-color: $edit-color-hover;
+  &:hover {
+    background-color: $edit-color-hover;
+  }
 }
 
 .delete-btn {
   background-color: $warn-color;
   border-color: $warn-color;
-}
-
-.delete-btn:hover {
-  background-color: $warn-color-hover;
+  &:hover {
+    background-color: $warn-color-hover;
+  }
 }
 
 .create-btn {
   background-color: $tertiary-color;
   border-color: $tertiary-color;
-}
-
-.create-btn:hover {
-  background-color: $tertiary-color-hover;
+  &:hover {
+    background-color: $tertiary-color-hover;
+  }
 }
 
 .row {
@@ -83,29 +67,22 @@ input[type=number] {
   }
 }
 
-.form-control:disabled {
-  color: $primary-color;
-  cursor: not-allowed;
-}
-
 .toast-success {
   color: black;
   background-color: $tertiary-color;
-}
-
-.toast-success:hover {
-  background-color: $tertiary-color-hover;
-  cursor: pointer;
+  &:hover {
+    background-color: $tertiary-color-hover;
+    cursor: pointer;
+  }
 }
 
 .toast-warn {
   color: black;
   background-color: $warn-color;
-}
-
-.toast-warn:hover {
-  background-color: $warn-color-hover;
-  cursor: pointer;
+  &:hover {
+    background-color: $warn-color-hover;
+    cursor: pointer;
+  }
 }
 
 .login-page, .signup-page {
@@ -115,61 +92,60 @@ input[type=number] {
   width: 100%;
   height: 100%;
   background-color: $primary-color;
-}
 
-.login-container, .signup-container {
-  position:relative;
-  text-align:center;
-  padding: 3vh 0 0 0;
-  width: 30%;
-  height: 80%;
-  background-color: white;
-}
+  .login-container, .signup-container {
+    position:relative;
+    text-align:center;
+    padding: 3vh 0 0 0;
+    width: 30%;
+    height: 80%;
+    background-color: white;
 
-.login-footer, .signup-footer{
-  padding-bottom: 2vh;
-  width: 100%;
-  text-align: center;
-  position: absolute;
-  bottom: 0;
+    .container-error {
+      display: flex;
+      justify-content: center;
+
+      .show-error {
+        color: black;
+        width: 20vw;
+        padding: 1vh 1vw;
+        background-color: $warn-color;
+      }
+    }
+
+    .resize-after-error {
+      height: 15vh;
+    }
+
+    .login-footer, .signup-footer {
+      padding-bottom: 2vh;
+      width: 100%;
+      text-align: center;
+      position: absolute;
+      bottom: 0;
+
+      .login-button, .signup-button {
+        font-weight: bold;
+        font-size: 16px;
+        width: 12vw;
+        padding: 15px 0;
+        margin-bottom: 2vh;
+      }
+    }
+  }
 }
 
 .link {
   color: black;
   cursor: pointer;
-}
-
-.link:hover {
-  text-decoration: underline;
-}
-
-.show-error {
-  color: black;
-  width: 20vw;
-  padding: 1vh 1vw;
-  background-color: $warn-color;
-}
-
-.container-error {
-  display: flex;
-  justify-content: center;
-}
-
-.login-button, .signup-button {
-  font-weight: bold;
-  font-size: 16px;
-  width: 12vw;
-  padding: 15px 0;
-  margin-bottom: 2vh;
+  &:hover {
+    text-decoration: underline;
+  }
 }
 
 .mat-error {
   color: $dark-red;
   font-size: 12px;
-}
-
-.resize-after-error {
-  height: 15vh;
 }
 
 .mat-option[aria-disabled=true] {

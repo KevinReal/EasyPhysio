@@ -6,11 +6,28 @@
   width: 100vw;
   height: 91vh;
   background-color: $primary-color;
+
+  .aboutus-container {
+    padding: 0 5vw;
+    margin-top: 2vh;
+    width: 75vw;
+    height: 78vh;
+    background-color: white;
+
+    .aboutus-title {
+      text-align: center;
+      margin: 3vh 0;
+      font-size: 22px;
+      font-weight: bold;
+
+      .login-link {
+        margin: 0 2vw;
+        &:hover {
+          cursor: pointer;
+          text-decoration: underline;
+        }
+      }
+    }
+  }
 }
 
-.aboutus-container {
-  margin-top: 2vh;
-  width: 70vw;
-  height: 78vh;
-  background-color: white;
-}

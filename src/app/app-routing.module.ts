@@ -6,12 +6,15 @@ import { SignupComponent } from "./signup/signup.component";
 import { AuthLoggedGuard } from "./guards/authLogged.guard";
 import { AuthNotLoggedGuard } from "./guards/auth-not-logged.guard";
 import { AboutUsComponent } from "./about-us/about-us.component";
+import { ReportsComponent } from "./reports/reports.component";
+import { LoggedUserIsPhysioGuard } from "./guards/logged-user-is-physio.guard";
 
 const routes: Routes = [
   { path: 'agenda', component: SchedulerComponent, canActivate: [AuthLoggedGuard] },
   { path: 'login', component: LoginComponent, canActivate: [AuthNotLoggedGuard]},
   { path: 'signup', component: SignupComponent, canActivate: [AuthNotLoggedGuard] },
   { path: 'about', component: AboutUsComponent },
+  { path: 'reports', component: ReportsComponent, canActivate: [LoggedUserIsPhysioGuard] },
   { path: '', redirectTo: '/about', pathMatch: 'full' },
   { path: '**', component: SchedulerComponent, canActivate: [AuthLoggedGuard] }
 ];

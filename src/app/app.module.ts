@@ -6,7 +6,6 @@ import { SchedulerComponent } from './scheduler/scheduler.component';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { DragDropModule } from "@angular/cdk/drag-drop";
-import { HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { AppointmentsPipe } from './pipes/appointments.pipe';
 import { MatDatepickerModule } from '@angular/material/datepicker';
@@ -41,6 +40,10 @@ import { APP_INITIALIZER } from '@angular/core';
 import { FirebaseAuthService } from "./services/firebase-auth.service";
 import { FooterComponent } from './footer/footer.component';
 import { AboutUsComponent } from './about-us/about-us.component';
+import { ReportsComponent } from './reports/reports.component';
+import { NgxChartsModule } from "@swimlane/ngx-charts";
+import { MatRadioModule } from "@angular/material/radio";
+import { ShowMaxAppointmentsPipe } from './pipes/show-max-appointments.pipe';
 
 @NgModule({
   declarations: [
@@ -62,7 +65,9 @@ import { AboutUsComponent } from './about-us/about-us.component';
     RequiredDateAppointmentDirective,
     CheckOtherPatientsPermissionsPipe,
     FooterComponent,
-    AboutUsComponent
+    AboutUsComponent,
+    ReportsComponent,
+    ShowMaxAppointmentsPipe
   ],
     imports: [
         BrowserModule,
@@ -70,7 +75,6 @@ import { AboutUsComponent } from './about-us/about-us.component';
         NgbModule,
         BrowserAnimationsModule,
         DragDropModule,
-        HttpClientModule,
         FormsModule,
         MatDatepickerModule,
         MatInputModule,
@@ -83,7 +87,9 @@ import { AboutUsComponent } from './about-us/about-us.component';
         MatOptionModule,
         MatAutocompleteModule,
         MatTooltipModule,
-        MatSelectModule
+        MatSelectModule,
+        NgxChartsModule,
+        MatRadioModule
     ],
   providers: [AppointmentsPipe,
               {provide: MAT_DATE_LOCALE, useValue: 'es_ES'},

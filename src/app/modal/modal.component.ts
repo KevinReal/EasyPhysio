@@ -2,7 +2,7 @@ import { Component, Inject, OnInit, ViewEncapsulation } from '@angular/core';
 import { MatDialog, MatDialogRef } from "@angular/material/dialog";
 import { MAT_DIALOG_DATA } from '@angular/material/dialog'
 import { IAppointment } from "../models/IAppointment";
-import { includes, find, filter, some } from "lodash";
+import {includes, find, filter, some, indexOf} from "lodash";
 import * as moment from 'moment';
 import { IPhysio } from "../models/IPhysio";
 import { Moment } from "moment";
@@ -11,10 +11,11 @@ import { PhysioService } from "../services/physio.service";
 import { PatientService } from "../services/patient.service";
 import { RoomService } from "../services/room.service";
 import { IPatient } from "../models/IPatient";
-import { map } from "rxjs/operators";
+import {findIndex, map} from "rxjs/operators";
 import { Observable } from "rxjs";
 import { FirebaseAuthService } from "../services/firebase-auth.service";
 import { flatMap } from "rxjs/internal/operators";
+import { environment } from "../../environments/environment";
 
 @Component({
   selector: 'app-modal',
@@ -25,6 +26,7 @@ import { flatMap } from "rxjs/internal/operators";
 
 export class ModalComponent implements OnInit {
 
+  holidays = environment.holidays;
   canEdit = false;
   canDelete = false;
   canCreate = false;
@@ -45,8 +47,11 @@ export class ModalComponent implements OnInit {
   // @ts-ignore
   otherPatientsPermissions: flatMap<string, string[]> = {};
 
+  showPatientsNoSelectedFromList = false;
   showPatientsError = false;
-  appointmentBeforeToday = false;
+  showErrorSelectedHour = false;
+  showErrorRoom = false;
+  appointmentBeforeTodayOrHolidays = false;
 
   constructor(private matDialog: MatDialog,
               private dialogRef: MatDialogRef<ModalComponent>,
@@ -64,6 +69,7 @@ export class ModalComponent implements OnInit {
 
 
   ngOnInit() {
+    this.appointmentBeforeTodayOrHolidays = this.isBeforeTodayOrHolidays(this.data.appointments[0], this.holidays);
     this.canEdit = includes(this.data.actions, 'Edit');
     this.canDelete = includes(this.data.actions, 'Delete');
     this.canCreate = includes(this.data.actions, 'Create');
@@ -83,12 +89,9 @@ export class ModalComponent implements OnInit {
     }
     this.otherPhysiosPermissions = this.firebaseAuth.getOtherPhysiosPermissions();
     this.otherPatientsPermissions = this.firebaseAuth.getOtherPatientsPermissions();
-    this.appointmentBeforeToday = this.isBeforeToday(this.data.appointments[0]);
   }
 
   createAppointment(appointment: IAppointment): void {
-    appointment = this.instantiateAppointmentAttributes(appointment, 0);
-
     let result = {
       appointment: appointment,
       action: 'Create'
@@ -97,8 +100,6 @@ export class ModalComponent implements OnInit {
   }
 
   updateAppointment(appointment: IAppointment): void {
-    appointment = this.instantiateAppointmentAttributes(appointment, 0);
-
     let result = {
       appointment: appointment,
       action: 'Edit'
@@ -161,10 +162,16 @@ export class ModalComponent implements OnInit {
     } else {
       appointment.treatment.patient = <IPatient>find(this.patientsListAux, ['uid', this.data.appointments[0].treatment.patient.uid]);
     }
-    if (this.canEdit) {
-      this.updateAppointment(appointment)
-    } else if (this.canCreate) {
-      this.createAppointment(appointment);
+    appointment = this.instantiateAppointmentAttributes(appointment, 0);
+    this.showErrorSelectedHour = this.checkMaxAppointmentsPerSlot(this.selectedHour[0], appointment);
+    this.showPatientsError = this.filterPatientWithAppointment(appointment.treatment.patient.uid, appointment.startAppointment, this.selectedHour[0])
+    this.showErrorRoom = this.checkAvailableRoom(appointment.room.id, appointment.startAppointment, this.selectedHour[0]);
+    if (!this.showErrorSelectedHour && !this.showPatientsError && !this.showErrorRoom) {
+      if (this.canEdit) {
+        this.updateAppointment(appointment)
+      } else if (this.canCreate) {
+        this.createAppointment(appointment);
+      }
     }
   }
 
@@ -186,9 +193,16 @@ export class ModalComponent implements OnInit {
     if (d && d < moment().subtract(1, "days")) {
       return false;
     }
+    const disableHolidays = some(this.holidays, function (holiday) {
+      if (d?.dayOfYear() === holiday) {
+        return true;
+      }
+      return;
+    });
     const day = d?.day();
     return day !== 0 &&
            day !== 6 &&
+           !disableHolidays &&
            includes(find(this.physios, ['dni', this.data.appointments[0].treatment.physio.dni])?.workingDays, day);
   }
 
@@ -196,8 +210,14 @@ export class ModalComponent implements OnInit {
     if (d && d < moment().subtract(1, "days")) {
       return false;
     }
+    const disableHolidays = some(this.holidays, function (holiday) {
+      if (d?.dayOfYear() === holiday) {
+        return true;
+      }
+      return;
+    });
     const day = d?.day();
-    return day !== 0 && day !== 6
+    return day !== 0 && day !== 6 && !disableHolidays;
   }
 
   getPhysios(): void {
@@ -261,7 +281,7 @@ export class ModalComponent implements OnInit {
   }
 
   changeWorkingHoursAndWorkingDate(dni: string, index: number) {
-    if (moment(this.data.appointments[index].startAppointment) < moment() && this.canCreate) {
+    if (moment(this.data.appointments[index].startAppointment) < moment().startOf('day') && this.canCreate || this.appointmentBeforeTodayOrHolidays) {
       this.data.appointments[index].startAppointment = '';
       this.selectedHour[index] = '';
     } else {
@@ -319,19 +339,20 @@ export class ModalComponent implements OnInit {
     return;
   }
 
-  isBeforeToday(appointment: IAppointment): boolean {
-    if (moment().startOf('day') > moment(appointment.startAppointment)) {
+  isBeforeTodayOrHolidays(appointment: IAppointment, holidays: number[]): boolean {
+    if (moment().startOf('day') > moment(appointment?.startAppointment) || (indexOf(holidays, moment(appointment?.startAppointment).dayOfYear()) !== -1) ) {
       return true;
-    } else if (moment().startOf('day') < moment(appointment.startAppointment)) {
+    } else if (moment().startOf('day') < moment(appointment?.startAppointment)) {
     } else return false;
     return false;
   }
 
   focusOut() {
-    this.showPatientsError = true;
+    this.showPatientsNoSelectedFromList = true;
   }
 
   focusIn() {
+    this.showPatientsNoSelectedFromList = false;
     this.showPatientsError = false;
   }
 

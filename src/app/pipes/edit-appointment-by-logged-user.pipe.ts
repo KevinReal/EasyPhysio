@@ -15,7 +15,7 @@ export class EditAppointmentByLoggedUserPipe implements PipeTransform {
             otherUsersPermissions: flatMap<string, string[]> | undefined,
             loggedPhysioDni: string | undefined,
             loggedPatientUid: string | undefined): boolean {
-    if (moment(appointment.startAppointment)  < moment()) {
+    if (moment(appointment.startAppointment)  < moment().startOf('day')) {
       return true;
     }
     if ((loggedPhysioDni && appointment.treatment.physio.dni === loggedPhysioDni) ||

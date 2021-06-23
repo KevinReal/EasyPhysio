@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { faCog } from '@fortawesome/free-solid-svg-icons';
 import { faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
 import { FirebaseAuthService } from "./services/firebase-auth.service";
@@ -7,6 +7,7 @@ import { faHistory } from '@fortawesome/free-solid-svg-icons';
 import { faChartPie } from '@fortawesome/free-solid-svg-icons';
 import { faShoppingCart } from '@fortawesome/free-solid-svg-icons';
 import { faInfoCircle } from '@fortawesome/free-solid-svg-icons';
+import { faCalendarAlt } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
   selector: 'app-root',
@@ -14,10 +15,9 @@ import { faInfoCircle } from '@fortawesome/free-solid-svg-icons';
   styleUrls: ['./app.component.scss']
 })
 
-export class AppComponent implements OnInit{
+export class AppComponent{
   title = 'EasyPhysio';
 
-  physioDni: string | undefined;
   faCog = faCog;
   faSignOutAlt = faSignOutAlt;
   faChartPie = faChartPie;
@@ -25,12 +25,9 @@ export class AppComponent implements OnInit{
   faInfoCircle = faInfoCircle;
   faUserCircle = faUserCircle;
   faHistory = faHistory;
+  faCalendarAlt = faCalendarAlt;
 
   constructor(public firebaseAuth: FirebaseAuthService) { }
-
-  ngOnInit() {
-    this.physioDni = this.firebaseAuth.getPhysioDNI();
-  }
 
   logout(): void {
     this.firebaseAuth.logout();

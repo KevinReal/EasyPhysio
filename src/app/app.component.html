@@ -1,18 +1,21 @@
 <mat-drawer-container class="custom-drawer" autosize>
   <mat-drawer class="sidenav-custom" #drawer mode="over" position="end">
-    <p class="item-sidenav">
+    <p (click)="drawer.toggle()" [routerLink]="['/agenda']" class="item-sidenav">
+      Mi agenda <fa-icon class="sidenav-icons" [icon]="faCalendarAlt"></fa-icon>
+    </p>
+    <p class="item-sidenav not-allowed">
       Mi perfil <fa-icon class="sidenav-icons" [icon]="faUserCircle"></fa-icon>
     </p>
-    <p *ngIf="!physioDni" class="item-sidenav">
+    <p *ngIf="!firebaseAuth.getPhysioDNI()" class="item-sidenav not-allowed">
       Mi histórico <fa-icon class="sidenav-icons" [icon]="faHistory"></fa-icon>
     </p>
-    <p *ngIf="!physioDni" class="item-sidenav">
+    <p *ngIf="!firebaseAuth.getPhysioDNI()" class="item-sidenav not-allowed">
       Mis bonos <fa-icon class="sidenav-icons" [icon]="faShoppingCart"></fa-icon>
     </p>
-    <p *ngIf="!physioDni" class="item-sidenav">
+    <p (click)="drawer.toggle()" [routerLink]="['/about']" *ngIf="!firebaseAuth.getPhysioDNI()" class="item-sidenav">
       Información sobre el centro <fa-icon class="sidenav-icons" [icon]="faInfoCircle"></fa-icon>
     </p>
-    <p *ngIf="physioDni" class="item-sidenav">
+    <p (click)="drawer.toggle()" [routerLink]="['/reports']" *ngIf="firebaseAuth.getPhysioDNI()" class="item-sidenav">
       Mis estadísticas <fa-icon class="sidenav-icons" [icon]="faChartPie"></fa-icon>
     </p>
   </mat-drawer>

@@ -4,7 +4,7 @@ import { IAppointment } from "../models/IAppointment";
 import { AppointmentService } from "../services/appointment.service";
 import { environment } from "../../environments/environment";
 import * as moment from 'moment';
-import { indexOf, findIndex, remove, filter, includes } from "lodash";
+import {indexOf, findIndex, remove, filter, includes, some} from "lodash";
 import { MatDialog } from "@angular/material/dialog";
 import { ModalComponent } from "../modal/modal.component";
 import { AppointmentsPipe } from "../pipes/appointments.pipe";
@@ -33,6 +33,7 @@ export class SchedulerComponent implements OnInit {
   hoursOfTheDay = environment.hoursOfTheDay;
   monthsOfTheYear = environment.monthsOfTheYear;
   workingHours = environment.workingHours;
+  holidays = environment.holidays;
 
   today;
   recalculatedDate;
@@ -113,10 +114,10 @@ export class SchedulerComponent implements OnInit {
                                   + weekDays + ' '
                                   + workingHour,
                                   'yyyy MM DD hh:mm');
-    if (moment() < dateSlotDropped) {
+    if (moment().startOf('day') < dateSlotDropped) {
       if (indexOf(this.workingHours, workingHour) !== -1) {
         if (event.previousContainer !== event.container &&
-          this.checkWorkingAndHourDayAndCheckMaxAppointmentsPerSlot(workingHour,
+          this.disableDropAppointmentByConditions(workingHour,
             weekDays,
             event.previousContainer.data[event.previousIndex])) {
           transferArrayItem(event.previousContainer.data,
@@ -355,8 +356,14 @@ export class SchedulerComponent implements OnInit {
   }
 
   filteringSatAndMonday = (d: Moment | null): boolean => {
+    const disableHolidays = some(this.holidays, function (holiday) {
+      if (d?.dayOfYear() === holiday) {
+        return true;
+      }
+      return;
+    });
     const day = d?.day();
-    return day !== 0 && day !== 6;
+    return day !== 0 && day !== 6 && !disableHolidays;
   }
 
   isPhysioOrPatient(): void {
@@ -377,12 +384,17 @@ export class SchedulerComponent implements OnInit {
     })
   }
 
-  checkWorkingAndHourDayAndCheckMaxAppointmentsPerSlot(workingHour: string, weekDays: number, appointment: IAppointment): boolean {
+  disableDropAppointmentByConditions(workingHour: string, weekDays: number, appointment: IAppointment): boolean {
     const dateSlotDropped = moment(this.recalculatedDate.year() + ' '
                                   + (this.recalculatedDate.month() + 1) + ' '
                                   + weekDays + ' '
                                   + workingHour,
                                   'yyyy MM DD hh:mm');
+
+    if (includes(this.holidays, dateSlotDropped.dayOfYear())) {
+      this.toastService.show('El centro se encuentra cerrado por día festivo.', {classname: 'toast-warn', delay: 10000})
+      return false;
+    }
     if (!includes(appointment.treatment.physio.workingDays, dateSlotDropped.day())) {
       this.toastService.show('El fisioterapeuta no trabaja ese día.', {classname: 'toast-warn', delay: 10000})
       return false;
@@ -391,25 +403,34 @@ export class SchedulerComponent implements OnInit {
       this.toastService.show('El fisioterapeuta no trabaja esa franja horaria.', {classname: 'toast-warn', delay: 10000})
       return false;
     }
-    const checkMaxAppointemntsPerSlot = filter(this.appointments, function (element: IAppointment) {
+    const checkMaxAppointmentsPerSlot = filter(this.appointments, (element: IAppointment) =>  {
       if (appointment.id === element.id) return;
       if (element.treatment.physio.dni === appointment.treatment.physio.dni) {
-        const startAppointment = moment(appointment.startAppointment);
-        let modifiedDateAppointment = moment(startAppointment.year() + ' '
-          + (startAppointment.month() + 1) + ' '
-          + weekDays + ' '
-          + workingHour,
-          'yyyy MM DD hh:mm');
-        if (modifiedDateAppointment > element.startAppointment) {
-        } else if (modifiedDateAppointment < element.startAppointment) {
-        } else {
-          return element;
-        }
+        return this.compareDatesAux(dateSlotDropped, weekDays, workingHour, element);
       }
       return;
     }).length > 1;
-    if (checkMaxAppointemntsPerSlot) {
+    if (checkMaxAppointmentsPerSlot) {
       this.toastService.show('Todas las citas del fisioterapeuta están cogidas para esa hora.', {classname: 'toast-warn', delay: 10000})
+      return false;
+    }
+    const filterPatientWithAppointment = some(this.appointments, (element: IAppointment) => {
+      if (appointment.id === element.id) return;
+      if (element.treatment.patient.uid === appointment.treatment.patient.uid) {
+        return this.compareDatesAux(dateSlotDropped, weekDays, workingHour, element);
+      }
+      return;
+    });
+    if (filterPatientWithAppointment) {
+      this.toastService.show('Este paciente ya tiene una cita en esa franja horaria.', {classname: 'toast-warn', delay: 10000})
+      return false;
+    }
+    const checkAvailableRoom = some(this.appointments, (element: IAppointment) => {
+      if (appointment.id === element.id) return;
+      return this.compareDatesAux(dateSlotDropped, weekDays, workingHour, element)?.room.id === appointment.room.id;
+    });
+    if (checkAvailableRoom) {
+      this.toastService.show('La sala escogida está ocupada.', {classname: 'toast-warn', delay: 10000})
       return false;
     }
     return true;
@@ -424,6 +445,13 @@ export class SchedulerComponent implements OnInit {
       return JSON.parse(`{ "color": "white", "background-image": "linear-gradient(to right, black 50% , ${color} 50%)" }`);
     }
     return JSON.parse(`{ "color": "white", "background-color": "${color}" }`);
+  }
+
+  compareDatesAux(dateSlotDropped: Moment, weekDays: number, selectedHour: string, appointment: IAppointment): IAppointment | undefined {
+    if (dateSlotDropped > moment(appointment.startAppointment)) {
+    } else if (dateSlotDropped < moment(appointment.startAppointment)) {
+    } else return appointment;
+    return;
   }
 
 }
