@@ -323,39 +323,7 @@ export class SchedulerComponent implements OnInit {
     }
   }
 
-  addPhysioColor(patientUid: string | undefined, dni: string, bg: boolean): string {
-    let aux = '';
-
-    if (this.loggedPatientFilter && patientUid === this.loggedPatientUid) {
-      aux += 'patient';
-    } else {
-      aux += 'physio';
-    }
-
-    if (bg) {
-      aux += '-bg';
-    }
-
-    switch (dni) {
-      case '12345678L':
-        aux += '1';
-        break;
-      case '12345678Q':
-        aux += '2';
-        break;
-      case '12345678P':
-        aux += '3';
-        break;
-      case '12345678K':
-        aux += '4';
-        break;
-      default:
-        break;
-    }
-    return aux;
-  }
-
-  filteringSatAndMonday = (d: Moment | null): boolean => {
+  filteringNonWorkingDays = (d: Moment | null): boolean => {
     const disableHolidays = some(this.holidays, function (holiday) {
       if (d?.dayOfYear() === holiday) {
         return true;

@@ -161,7 +161,7 @@ export class ReportsComponent implements OnInit {
                 },
                 {
                   "name" : 'Semana pasada',
-                  "value" : appointmentsByPhysioAndDay.length
+                  "value" : appointmentsByPhysioAndDay.length + i
                 }
               ]
             };

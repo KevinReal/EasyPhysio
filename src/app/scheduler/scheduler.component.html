@@ -12,7 +12,7 @@
            matInput
            [matDatepicker]="picker"
            [(ngModel)]="calendarDate"
-           [matDatepickerFilter]="filteringSatAndMonday"
+           [matDatepickerFilter]="filteringNonWorkingDays"
            (dateChange)="changeDateSelected($event)">
     <mat-datepicker-toggle id="calendar-icon" matSuffix [for]="picker"></mat-datepicker-toggle>
     <mat-datepicker #picker color="accent"></mat-datepicker>
