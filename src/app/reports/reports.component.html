@@ -64,7 +64,7 @@
         [view]="view"
         [animations]="animations"
         [scheme]="colorSchemeNumberCard"
-        [results]="appointmentsByPatientAndDates | showMaxAppointments : limitPatientsToShow"
+        [results]="appointmentsByInjuriesAndDates | showMaxAppointments : limitInjuriesToShow"
         [cardColor]="cardColor"
         [textColor]="textColor">
       </ngx-charts-number-card>
@@ -74,16 +74,16 @@
         <div class="row">
           <div class="col-2"></div>
           <div *ngFor="let week of weeksToAddNumberCard; let i = index" class="col-3">
-            <mat-radio-button [checked]="i === 0" (change)="getAppointmentsByPatientAndRangeOfDates(week)" value="{{week}}">
+            <mat-radio-button [checked]="i === 0" (change)="getAppointmentsByInjuriesAndRangeOfDates(week)" value="{{week}}">
               <strong>{{labelsRadioButtonNumberCard[i]}}</strong>
             </mat-radio-button>
           </div>
         </div>
       </mat-radio-group>
       <div class="text-align-center">
-        <mat-label class="label-modal" for="patient"><strong>Top pacientes del centro a mostrar: </strong></mat-label>
+        <mat-label class="label-modal" for="patient"><strong>Top lesiones del centro a mostrar: </strong></mat-label>
         <mat-form-field class="input-report" appearance="legacy">
-            <input matInput type="number" [(ngModel)]="limitPatientsToShow">
+            <input matInput type="number" [value]="limitInjuriesToShow" #input>
         </mat-form-field>
       </div>
     </div>

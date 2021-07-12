@@ -64,12 +64,11 @@ export class AppointmentService {
                                                  .where('startAppointment', '<', startEndAndEndDate[1]));
   }
 
-  getAppointmentsByPatientAndRangeOfDates(patientUid: string, weekMultiplier: number): AngularFirestoreCollection<IAppointment> {
+  getAppointmentsByInjuriesAndRangeOfDates(weekMultiplier: number): AngularFirestoreCollection<IAppointment> {
     const startEndAndEndDate = this.auxRangeOfDates(weekMultiplier);
 
     return this.afs.collection('appointment',
-      ref => ref.where('treatment.patient.uid', '==', patientUid)
-                       .where('startAppointment', '>=', startEndAndEndDate[0])
+      ref => ref.where('startAppointment', '>=', startEndAndEndDate[0])
                        .where('startAppointment', '<', startEndAndEndDate[1]));
   }
 

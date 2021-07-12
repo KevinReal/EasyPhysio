@@ -1,13 +1,15 @@
-import { Component, OnInit } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { AppointmentService } from "../services/appointment.service";
 import { PhysioService } from "../services/physio.service";
 import { IPhysio } from "../models/IPhysio";
-import { take } from "rxjs/operators";
+import {debounceTime, distinctUntilChanged, filter, take, tap} from "rxjs/operators";
 import { PatientService } from "../services/patient.service";
 import { IPatient } from "../models/IPatient";
 import { FirebaseAuthService } from "../services/firebase-auth.service";
 import { RoomService } from "../services/room.service";
 import { IRoom } from "../models/IRoom";
+import { chain, groupBy} from "lodash";
+import {fromEvent} from "rxjs";
 
 @Component({
   selector: 'app-reports',
@@ -15,7 +17,9 @@ import { IRoom } from "../models/IRoom";
   styleUrls: ['./reports.component.scss']
 })
 
-export class ReportsComponent implements OnInit {
+export class ReportsComponent implements OnInit, AfterViewInit {
+  // @ts-ignore
+  @ViewChild('input', {static: true}) input: ElementRef;
 
   physios!: IPhysio[];
   patients!: IPatient[];
@@ -58,7 +62,7 @@ export class ReportsComponent implements OnInit {
   labelsCheckboxMultipleVerticalBar = ['Semana actual', 'Semana pasada'];
 
 
-  appointmentsByPatientAndDates: any[] = [];
+  appointmentsByInjuriesAndDates: any[] = [];
   cardColor = '#232837';
   textColor = '#fff';
   colorSchemeNumberCard = {
@@ -66,7 +70,7 @@ export class ReportsComponent implements OnInit {
   };
   weeksToAddNumberCard = [0, 3, 51];
   labelsRadioButtonNumberCard = ['Semana actual', 'Último mes', 'Último año'];
-  limitPatientsToShow = 5;
+  limitInjuriesToShow = 3;
 
 
   appointmentsByRoomAndRangeOfDates: any[] = [];
@@ -101,7 +105,7 @@ export class ReportsComponent implements OnInit {
     });
     this.patientService.getPatients().pipe(take(1)).subscribe(patients => {
       this.patients = patients;
-      this.getAppointmentsByPatientAndRangeOfDates(0);
+      this.getAppointmentsByInjuriesAndRangeOfDates(0);
     });
     this.roomService.getRooms().pipe(take(1)).subscribe(rooms => {
       this.rooms = rooms;
@@ -110,6 +114,20 @@ export class ReportsComponent implements OnInit {
     this.getAppointmentsByPhysioAndDay(0);
     this.colorSchemeMultipleVerticalBar.domain.push(this.firebaseAuthService.getColor());
     this.colorSchemeMultipleVerticalBar.domain.push('#000');
+  }
+
+  ngAfterViewInit() {
+    fromEvent(this.input.nativeElement,'keyup')
+      .pipe(
+        filter(Boolean),
+        debounceTime(1500),
+        // @ts-ignore
+        distinctUntilChanged(),
+        tap((event:KeyboardEvent) => {
+          this.limitInjuriesToShow = this.input.nativeElement.value;
+        })
+      )
+      .subscribe();
   }
 
   getAppointmentsByPhysioAndRangeOfDates(weekMultiplier: number) {
@@ -172,26 +190,32 @@ export class ReportsComponent implements OnInit {
     }
   }
 
-  getAppointmentsByPatientAndRangeOfDates(weekMultiplier: number) {
-    this.appointmentsByPatientAndDates = [];
-    this.patients.forEach(patient => {
-      this.appointmentService.getAppointmentsByPatientAndRangeOfDates(patient.uid, weekMultiplier)
-        .valueChanges()
-        .pipe(take(1))
-        .subscribe(appointmentsByPatientAndDates => {
+  getAppointmentsByInjuriesAndRangeOfDates(weekMultiplier: number) {
+    this.appointmentsByInjuriesAndDates = [];
+    this.appointmentService.getAppointmentsByInjuriesAndRangeOfDates(weekMultiplier)
+      .valueChanges()
+      .pipe(take(1))
+      .subscribe(appointmentsByInjuriesAndDates => {
+        const appointments = chain(appointmentsByInjuriesAndDates)
+          .groupBy("reasonAppointment")
+          .map((value, key) => ({ injury: key, appointments: value }))
+          .value();
+
+        appointments.forEach(appointment => {
           const value = {
-            "name" : patient.fullName,
-            "value" : appointmentsByPatientAndDates.length
+            "name" : appointment.injury,
+            "value" : appointment.appointments.length
           };
-          this.appointmentsByPatientAndDates.push(value);
-          this.appointmentsByPatientAndDates.sort(function(a, b) {
-            if (a.value > b.value) return -1;
-            if (a.value < b.value) return 1;
-            return 0;
-          });
-          this.appointmentsByPatientAndDates = [...this.appointmentsByPatientAndDates];
+          this.appointmentsByInjuriesAndDates.push(value);
         })
-    })
+
+        this.appointmentsByInjuriesAndDates.sort(function(a, b) {
+          if (a.value > b.value) return -1;
+          if (a.value < b.value) return 1;
+          return 0;
+        });
+        this.appointmentsByInjuriesAndDates = [...this.appointmentsByInjuriesAndDates];
+      })
   }
 
   getAppointmentsByRoomAndRangeOfDates(weekMultiplier: number) {

@@ -18,5 +18,13 @@
         text-decoration: underline;
       }
     }
+    .footer-content-disabled {
+      cursor: not-allowed;
+      font-weight: normal;
+      color: rgba(0, 0, 0, 0.6);
+      &:hover {
+        text-decoration: none;
+      }
+    }
   }
 }

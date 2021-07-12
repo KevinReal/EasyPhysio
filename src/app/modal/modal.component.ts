@@ -2,7 +2,7 @@ import { Component, Inject, OnInit, ViewEncapsulation } from '@angular/core';
 import { MatDialog, MatDialogRef } from "@angular/material/dialog";
 import { MAT_DIALOG_DATA } from '@angular/material/dialog'
 import { IAppointment } from "../models/IAppointment";
-import {includes, find, filter, some, indexOf} from "lodash";
+import { includes, find, filter, some, indexOf } from "lodash";
 import * as moment from 'moment';
 import { IPhysio } from "../models/IPhysio";
 import { Moment } from "moment";
@@ -11,7 +11,7 @@ import { PhysioService } from "../services/physio.service";
 import { PatientService } from "../services/patient.service";
 import { RoomService } from "../services/room.service";
 import { IPatient } from "../models/IPatient";
-import {findIndex, map} from "rxjs/operators";
+import { map } from "rxjs/operators";
 import { Observable } from "rxjs";
 import { FirebaseAuthService } from "../services/firebase-auth.service";
 import { flatMap } from "rxjs/internal/operators";
